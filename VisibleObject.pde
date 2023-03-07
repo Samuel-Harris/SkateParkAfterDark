@@ -1,0 +1,3 @@
+interface VisibleObject {
+  void draw();
+}
