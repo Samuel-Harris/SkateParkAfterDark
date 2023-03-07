@@ -15,21 +15,26 @@ class Player extends Particle {
   }
   
   void draw() {
+    PVector moveDirection = new PVector(0, 0);
     if (isMovingLeft) {
-      addForce(new PVector(-moveForce, 0));
+      moveDirection.add(new PVector(-1, 0));
     }
     
     if (isMovingRight) {
-      addForce(new PVector(moveForce, 0));
+      moveDirection.add(new PVector(1, 0));
     }
     
     if (isMovingUp) {
-      addForce(new PVector(0, -moveForce));
+      moveDirection.add(new PVector(0, -1));
     }
     
     if (isMovingDown) {
-      addForce(new PVector(0, moveForce));
+      moveDirection.add(new PVector(0, 1));
     }
+    
+    moveDirection.normalize();
+    addForce(moveDirection.mult(moveForce));
+    print(forceAccumulator);
     
     if (canMove) {
       integrate();
