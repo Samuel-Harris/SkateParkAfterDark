@@ -1,0 +1,3 @@
+interface Enemy {
+  int getHealth();
+}
