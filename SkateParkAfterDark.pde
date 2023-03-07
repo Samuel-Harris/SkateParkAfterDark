@@ -1,11 +1,18 @@
-boolean startScreen = true, pauseScreen = false, gameOverScreen = false;
+boolean startScreen = true, 
+        pauseScreen = false, 
+        gameOverScreen = false;
 
 PImage bgImage;
 
 int round = 1;
 
-float mapWidth, mapHeight, cameraX, cameraY;
+float mapWidth, 
+      mapHeight, 
+      cameraX, 
+      cameraY;
+      
 float playerX, playerY;
+Particle player;
 
 void setup() {
   fullScreen();
@@ -38,7 +45,10 @@ void draw() {
     text("Skate Park\nAfter Dark", cameraX + width/2, cameraY + height/2);
     return;
   }
-  // codde
+  
+  player.draw(!pauseScreen);
+  
+  
   
   translate(cameraX, cameraY);
 }
