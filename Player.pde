@@ -34,12 +34,10 @@ class Player extends Particle {
     
     moveDirection.normalize();
     addForce(moveDirection.mult(moveForce));
-    print(forceAccumulator);
     
     if (canMove) {
       integrate();
     }
-    
     
     fill(0);
     stroke(0);
