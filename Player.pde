@@ -9,7 +9,6 @@ class Player extends Particle {
   
   public Player(PVector startPos) {
     super(startPos, 1000.0, 50);
-    canMove = true;
     
     moveForce = 3000;
   }

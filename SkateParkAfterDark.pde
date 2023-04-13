@@ -28,7 +28,7 @@ void setup() {
 
   bgImage = loadImage("bg.jpg");
 
-  mapWidth = 3 * displayWidth; //<>//
+  mapWidth = 3 * displayWidth; //<>// //<>//
   mapHeight = 3 * displayHeight;
 
   float playerX = mapWidth/2;

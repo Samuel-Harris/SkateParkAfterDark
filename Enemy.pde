@@ -2,10 +2,14 @@ class Enemy extends Particle {
   boolean isColliding;
   
   public Enemy() {
-    super(new PVector(3 * displayWidth/2 - 200, 3 * displayHeight/2 - 200), 100, 50);
+    super(new PVector(3 * displayWidth/2 - 200, 3 * displayHeight/2 - 200), 1500, 50);
   }
   
   public void draw() {
+    if (canMove) {
+      integrate();
+    }
+    
     if (isColliding) {
       fill(0, 255, 0);
       isColliding = false;
