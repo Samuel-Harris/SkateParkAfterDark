@@ -1,14 +1,12 @@
 class CollisionDetector {
-  void detectCollision(Collidable collidableA, Collidable collidableB) {
-    boolean collisionDetected = false;
+  Optional<Contact> detectCollision(Collidable collidableA, Collidable collidableB) {
     if (collidableA instanceof Circle && collidableB instanceof Circle) {
-      collisionDetected = detectCircleCircleCollision((Circle) collidableA, (Circle) collidableB);
+      if (detectCircleCircleCollision((Circle) collidableA, (Circle) collidableB)) {
+        return Optional.of(new Contact(collidableA, collidableB, 0.9, PVector.sub(collidableB.getPos(), collidableA.getPos())));
+      }
     }
     
-    if (collisionDetected) {
-      collidableA.collideWith(collidableB);
-      collidableB.collideWith(collidableA);
-    }
+    return Optional.empty();
   }
   
   

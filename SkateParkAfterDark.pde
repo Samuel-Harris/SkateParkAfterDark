@@ -1,4 +1,5 @@
 import java.util.List;
+import java.util.Optional;
 
 boolean startScreen = true,
         pauseScreen = false,
@@ -52,10 +53,21 @@ void setup() {
 }
 
 void draw() {
+  List<Contact> contactList = new ArrayList();
   for (int i=0; i<collidableObjectList.size(); i++) {
     for (int j=i+1; j<collidableObjectList.size(); j++) {
-      collisionDetector.detectCollision(collidableObjectList.get(i), collidableObjectList.get(j));
+      Collidable collidableA = collidableObjectList.get(i);
+      Collidable collidableB = collidableObjectList.get(j);
+      
+      Optional<Contact> contactOptional = collisionDetector.detectCollision(collidableA, collidableB);
+      if (contactOptional.isPresent()) {
+        contactList.add(contactOptional.get());
+      }
     }
+  }
+  
+  for (Contact contact: contactList) {
+    contact.resolve();
   }
   
   cameraX = player.pos.x - displayWidth/2;

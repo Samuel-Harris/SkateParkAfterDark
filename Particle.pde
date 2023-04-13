@@ -36,6 +36,14 @@ abstract class Particle implements VisibleObject, Circle {
     return pos;
   }
   
+  PVector getVelocity() {
+    return PVector.sub(prevPos, pos);
+  }
+  
+  float getInvMass() {
+    return invMass;
+  }
+  
   void addForce(PVector force) {
     forceAccumulator.add(force);
   }
