@@ -3,7 +3,9 @@ import java.util.List;
 boolean startScreen = true,
         pauseScreen = false,
         gameOverScreen = false,
-        mouseOverStartButton = false;
+        mouseOverStartButton = false,
+        mouseOverContinueButton = false,
+        mouseOverExitButton = false;
 
 PImage bgImage;
 
@@ -61,6 +63,7 @@ void drawStartScreen() {
   text("Skate Park\nAfter Dark", cameraX + width/2, cameraY + height/2);
   
   rectMode(CORNER);
+  
   float x = cameraX + width/2 - 50;
   float y = cameraY + width/2 ;
   float w = 100;
@@ -74,10 +77,50 @@ void drawStartScreen() {
     mouseOverStartButton = false;
   }
   rect(x, y, w, h);
-  
   fill(255);
   String str = "Start!";
   text(str, cameraX + width/2, cameraY + width/2 + 20);
+}
+
+void drawPauseScreen() {
+  textAlign(CENTER, CENTER);
+  textSize(32);
+  fill(159,20,0);
+  text("Skate Park\nAfter Dark", cameraX + width/2, cameraY + height/4);
+  text("Game Paused", cameraX + width/2, cameraY + height/2);
+  
+  rectMode(CORNER);
+  float x = cameraX + width/2 - 65;
+  float y = cameraY + width/2 ;
+  float w = 130;
+  float h = 50;
+  if (overRect(x,y,w,h)) {
+    fill(12,160,20);
+    mouseOverContinueButton = true;
+  }
+  else {
+    fill(230,230,230);
+    mouseOverContinueButton = false;
+  }
+  rect(x, y, w, h);
+  
+  fill(255);
+  String str = "Continue";
+  text(str, cameraX + width/2, cameraY + width/2 + 20);
+  
+  y = cameraY + width/2 + 70;
+  if (overRect(x,y,w,h)) {
+    fill(12,160,20);
+    mouseOverExitButton = true;
+  }
+  else {
+    fill(230,230,230);
+    mouseOverExitButton = false;
+  }
+  rect(x, y, w, h);
+  fill(255);
+  str = "Exit";
+  text(str, cameraX + width/2, cameraY + width/2 + 90);
 }
 
 void draw() {
@@ -95,6 +138,11 @@ void draw() {
     drawStartScreen();
     return;
   }
+  
+  if (pauseScreen) {
+    drawPauseScreen();
+    return;
+  }
 
   for (VisibleObject visibleObject: visibleObjectList) {
     visibleObject.draw();
@@ -106,40 +154,61 @@ void draw() {
 void keyPressed() {
   switch (key) {
     case 'w':
+    case 'W':
       player.startMovingUp();
       break;
     case 'a':
+    case 'A':
       player.startMovingLeft();
       break;
     case 's':
+    case 'S':
       player.startMovingDown();
       break;
     case 'd':
+    case 'D':
       player.startMovingRight();
       break;
   }
 }
 
 void keyReleased() {
+  if (key == CODED) {
+    if (keyCode == TAB) pauseScreen = true;
+  }
   switch (key) {
     case 'w':
+    case 'W':
       player.stopMovingUp();
       break;
     case 'a':
+    case 'A':
       player.stopMovingLeft();
       break;
     case 's':
+    case 'S':
       player.stopMovingDown();
       break;
     case 'd':
+    case 'D':
       player.stopMovingRight();
       break;
+    case TAB:
+      pauseScreen = true;
+      break;
+      
   }
 }
 
 void mouseReleased() {
   if (mouseOverStartButton) {
     startScreen = mouseOverStartButton = false;
+  }
+  if (mouseOverContinueButton) {
+    pauseScreen = mouseOverContinueButton = false;
+  }
+  if (mouseOverExitButton) {
+    exit();
   }
 }
 
