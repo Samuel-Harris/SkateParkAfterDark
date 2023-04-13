@@ -1,17 +1,20 @@
-abstract class Particle implements VisibleObject {
+abstract class Particle implements VisibleObject, Circle {
   PVector pos;
   PVector prevPos;
   PVector forceAccumulator;
   float mass;
   float invMass;
   boolean canMove;
+  float radius;
   
-  public Particle(PVector pos, float mass) {
+  public Particle(PVector pos, float mass, float radius) {
     this.pos = pos.copy();
     this.prevPos = pos.copy();
     this.forceAccumulator = new PVector(0, 0);
     this.mass = mass;
     invMass = 1.0/mass;
+    
+    this.radius = radius;
   }
   
   abstract void draw();
@@ -23,6 +26,22 @@ abstract class Particle implements VisibleObject {
     prevPos = tmp;
     
     forceAccumulator = new PVector(0, 0);
+  }
+  
+  float getRadius() {
+    return radius;
+  }
+  
+  PVector getPos() {
+    return pos;
+  }
+  
+  PVector getVelocity() {
+    return PVector.sub(prevPos, pos);
+  }
+  
+  float getInvMass() {
+    return invMass;
   }
   
   void addForce(PVector force) {

@@ -1,4 +1,5 @@
 import java.util.List;
+import java.util.Optional;
 
 boolean startScreen = true,
         pauseScreen = false,
@@ -20,6 +21,11 @@ float mapWidth,
 Player player;
 
 List<VisibleObject> visibleObjectList;
+List<Collidable> collidableObjectList;
+
+CollisionDetector collisionDetector;
+
+Enemy enemy;
 
 void setup() {
   fullScreen();
@@ -28,7 +34,7 @@ void setup() {
   
   //frameRate(60);
 
-  mapWidth = 3.5 * displayWidth; //<>//
+  mapWidth = 3.5 * displayWidth;
   mapHeight = 5 * displayHeight;
   
 
@@ -38,8 +44,17 @@ void setup() {
   cameraX = player.pos.x - displayWidth/2;
   cameraY = player.pos.y - displayHeight/2;
   
+  enemy = new Enemy();
+  
   visibleObjectList = new ArrayList();
   visibleObjectList.add(player);
+  visibleObjectList.add(enemy);
+  
+  collidableObjectList = new ArrayList();
+  collidableObjectList.add(player);
+  collidableObjectList.add(enemy);
+  
+  collisionDetector = new CollisionDetector();
 }
 
 void drawOcatgon() {
@@ -124,6 +139,23 @@ void drawPauseScreen() {
 }
 
 void draw() {
+  List<Contact> contactList = new ArrayList();
+  for (int i=0; i<collidableObjectList.size(); i++) {
+    for (int j=i+1; j<collidableObjectList.size(); j++) {
+      Collidable collidableA = collidableObjectList.get(i);
+      Collidable collidableB = collidableObjectList.get(j);
+      
+      Optional<Contact> contactOptional = collisionDetector.detectCollision(collidableA, collidableB);
+      if (contactOptional.isPresent()) {
+        contactList.add(contactOptional.get());
+      }
+    }
+  }
+  
+  for (Contact contact: contactList) {
+    contact.resolve();
+  }
+  
   cameraX = player.pos.x - displayWidth/2;
   cameraY = player.pos.y- displayHeight/2;
 
@@ -147,6 +179,7 @@ void draw() {
   for (VisibleObject visibleObject: visibleObjectList) {
     visibleObject.draw();
   }
+  
   
   translate(cameraX, cameraY);
 }
