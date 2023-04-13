@@ -13,10 +13,14 @@ float mapWidth,
       cameraX,
       cameraY;
 
-float playerX, playerY;
 Player player;
 
 List<VisibleObject> visibleObjectList;
+List<Collidable> collidableObjectList;
+
+CollisionDetector collisionDetector;
+
+Enemy enemy;
 
 void setup() {
   fullScreen();
@@ -26,19 +30,34 @@ void setup() {
   mapWidth = 3 * displayWidth; //<>//
   mapHeight = 3 * displayHeight;
 
-   playerX = mapWidth/2;
-   playerY = mapHeight/2;
+  float playerX = mapWidth/2;
+  float playerY = mapHeight/2;
 
-  player = new Player(new PVector(displayWidth/2, displayHeight/2)); 
+  player = new Player(new PVector(playerX, playerY)); 
 
   cameraX = player.pos.x - displayWidth/2;
   cameraY = player.pos.y- displayHeight/2;
   
+  enemy = new Enemy();
+  
   visibleObjectList = new ArrayList();
   visibleObjectList.add(player);
+  visibleObjectList.add(enemy);
+  
+  collidableObjectList = new ArrayList();
+  collidableObjectList.add(player);
+  collidableObjectList.add(enemy);
+  
+  collisionDetector = new CollisionDetector();
 }
 
 void draw() {
+  for (int i=0; i<collidableObjectList.size(); i++) {
+    for (int j=i+1; j<collidableObjectList.size(); j++) {
+      collisionDetector.detectCollision(collidableObjectList.get(i), collidableObjectList.get(j));
+    }
+  }
+  
   cameraX = player.pos.x - displayWidth/2;
   cameraY = player.pos.y- displayHeight/2;
 
@@ -56,6 +75,7 @@ void draw() {
   for (VisibleObject visibleObject: visibleObjectList) {
     visibleObject.draw();
   }
+  
   
   translate(cameraX, cameraY);
 }

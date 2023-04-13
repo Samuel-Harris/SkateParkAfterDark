@@ -8,7 +8,7 @@ class Player extends Particle {
   boolean isMovingDown;
   
   public Player(PVector startPos) {
-    super(startPos, 1000.0);
+    super(startPos, 1000.0, 50);
     canMove = true;
     
     moveForce = 3000;
@@ -41,7 +41,10 @@ class Player extends Particle {
     
     fill(0);
     stroke(0);
-    circle(pos.x, pos.y, 100);
+    circle(pos.x, pos.y, 2*radius);
+  }
+  
+  void collideWith(Collidable other) {
   }
   
   int getLives() {
