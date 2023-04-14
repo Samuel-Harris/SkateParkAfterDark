@@ -49,7 +49,7 @@ void setup() {
   
   enemies = new ArrayList();
   for (int i = 0; i < 3; i++) {
-    enemies.add(new Enemy(new PVector(mapWidth/2, mapHeight/2), player, int(random(2000,3000)), int(random(6,13))));
+    enemies.add(new Enemy(new PVector(mapWidth/3, mapHeight/3), player, int(random(2000,3000)), int(random(6,13))));
   }
   
   visibleObjectList = new ArrayList();
@@ -190,6 +190,10 @@ void drawUserInfo() {
 }
 
 void draw() {
+  List toRemove = collidableObjectList.stream().filter(e -> e instanceof Bullet).map(e -> (Bullet)e).filter(e -> e.life <= 0).collect(Collectors.toList());
+  collidableObjectList.removeAll(toRemove);
+  visibleObjectList.removeAll(toRemove);
+  
   List<Contact> contactList = new ArrayList();
   for (int i=0; i<collidableObjectList.size(); i++) {
     for (int j=i+1; j<collidableObjectList.size(); j++) {
@@ -228,7 +232,8 @@ void draw() {
   }
   
   if (player.getLives()<=0) {
-    
+    //drawGameOverScreen();
+    //return;
   }
 
   for (VisibleObject visibleObject: visibleObjectList) {
@@ -292,16 +297,34 @@ void mouseReleased() {
   if (mouseOverStartButton) {
     startScreen = mouseOverStartButton = false;
   }
-  if (mouseOverContinueButton) {
+  else if (mouseOverContinueButton) {
     pauseScreen = mouseOverContinueButton = false;
   }
-  if (mouseOverRetryButton) {
+  else if (mouseOverRetryButton) {
     setup();
   }
-  if (mouseOverExitButton) {
+  else if (mouseOverExitButton) {
     exit();
   }
+  else {
+    fireBullets();
+  }
   
+}
+
+void fireBullets() {
+  if (player.bulletCount < 5) {
+    return;
+  }
+  player.bulletCount -= 5;
+  for (int i = 0; i < 5; i++) {
+    float angle = random(player.minAngle, player.maxAngle);
+    PVector dir = PVector.fromAngle(angle).setMag(100);
+    PVector pos = PVector.add(player.pos,dir);
+    Bullet b = new Bullet(pos, dir, 50);
+    visibleObjectList.add(b);
+    collidableObjectList.add(b);
+  }
 }
 
 boolean overRect(float x, float y, float w, float h) {
