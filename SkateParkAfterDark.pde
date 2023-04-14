@@ -25,34 +25,33 @@ List<Collidable> collidableObjectList;
 
 CollisionDetector collisionDetector;
 
-Enemy enemy;
+List<Enemy> enemies;
 
 void setup() {
-  fullScreen();
+  fullScreen(); //<>//
 
   bgImage = loadImage("bg.jpg");
-  
-  //frameRate(60);
 
   mapWidth = 3.5 * displayWidth;
   mapHeight = 5 * displayHeight;
   
-
-
   player = new Player(new PVector(mapWidth/2, mapHeight/2)); 
 
   cameraX = player.pos.x - displayWidth/2;
   cameraY = player.pos.y - displayHeight/2;
   
-  enemy = new Enemy();
+  enemies = new ArrayList();
+  for (int i = 0; i < 3; i++) {
+    enemies.add(new Enemy(new PVector(mapWidth/2, mapHeight/2), player, int(random(100,200)), int(random(6,13))));
+  }
   
   visibleObjectList = new ArrayList();
   visibleObjectList.add(player);
-  visibleObjectList.add(enemy);
+  visibleObjectList.addAll(enemies);
   
   collidableObjectList = new ArrayList();
   collidableObjectList.add(player);
-  collidableObjectList.add(enemy);
+  collidableObjectList.addAll(enemies);
   
   collisionDetector = new CollisionDetector();
 }
