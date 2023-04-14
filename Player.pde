@@ -1,16 +1,25 @@
+import java.util.LinkedList;
+import java.util.stream.Collectors; 
+
+
 class Player extends Particle {
   int lives;
-  
+  int bulletCount;
   float moveForce;
   boolean isMovingLeft;
   boolean isMovingRight;
   boolean isMovingUp;
   boolean isMovingDown;
+  float minAngle,maxAngle;
   
   public Player(PVector startPos) {
     super(startPos, 1000.0, 50);
-    
+    canMove = true;
+    lives = 3;
+    minAngle = 0;
+    maxAngle = 0;
     moveForce = 3000;
+    bulletCount = 500;
   }
   
   void draw() {
@@ -41,9 +50,19 @@ class Player extends Particle {
     fill(0);
     stroke(0);
     circle(pos.x, pos.y, 2*radius);
+    float angle = atan2(cameraY+mouseY - pos.y, cameraX+mouseX - pos.x );
+    minAngle = angle-QUARTER_PI/3;
+    maxAngle = angle+QUARTER_PI/3;
+    fill(244);
+    stroke(244);
+    arc(pos.x, pos.y, 200, 200, minAngle, maxAngle);
+    ellipseMode(CENTER);
+    
   }
   
   void collideWith(Collidable other) {
+    lives--;
+    println(lives);
   }
   
   int getLives() {

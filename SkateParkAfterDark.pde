@@ -3,9 +3,9 @@ import java.util.Optional;
 
 boolean startScreen = true,
         pauseScreen = false,
-        gameOverScreen = false,
         mouseOverStartButton = false,
         mouseOverContinueButton = false,
+        mouseOverRetryButton = false,
         mouseOverExitButton = false;
 
 PImage bgImage;
@@ -28,14 +28,21 @@ CollisionDetector collisionDetector;
 List<Enemy> enemies;
 
 PShape octagon;
- //<>//
+
 void setup() {
-  fullScreen(); //<>// //<>// //<>//
+  fullScreen();
+  startScreen = true;
+  pauseScreen = false;
+  mouseOverStartButton = false;
+  mouseOverContinueButton = false;
+  mouseOverRetryButton = false;
+  mouseOverExitButton = false;
 
   bgImage = loadImage("bg.jpg");
+  round = 1;
 
-  mapWidth = 3 * displayWidth; //<>// //<>//
-  mapHeight = 3 * displayHeight;
+  mapWidth = 5 * displayWidth;
+  mapHeight = 5 * displayHeight;
 
   player = new Player(new PVector(mapWidth/2, mapHeight/2));
 
@@ -44,21 +51,19 @@ void setup() {
   
   enemies = new ArrayList();
   for (int i = 0; i < 3; i++) {
-    enemies.add(new Enemy(new PVector(mapWidth/2, mapHeight/2), player, int(random(2000,3000)), int(random(6,13))));
+    enemies.add(new Enemy(new PVector(mapWidth/3, mapHeight/3), player, int(random(2000,3000)), int(random(6,13))));
   }
-  
   
   visibleObjectList = new ArrayList();
   visibleObjectList.add(player);
   visibleObjectList.addAll(enemies);
-  
   
   collidableObjectList = new ArrayList();
   collidableObjectList.add(player);
   collidableObjectList.addAll(enemies);
   
   collisionDetector = new CollisionDetector();
-  
+
   PVector octagonCentre = new PVector(mapWidth/2, mapHeight/2);
   float EIGHTH_PI = PI / 8;
   octagon = createShape();
@@ -70,7 +75,7 @@ void setup() {
     float sx = octagonCentre.x + cos(i*QUARTER_PI+EIGHTH_PI) * octagonRadius;
     float sy = octagonCentre.y + sin(i*QUARTER_PI+EIGHTH_PI) * octagonRadius;
     octagon.vertex(sx, sy);
-    
+
     collidableObjectList.add(new LineSegment(new PVector(prevSx, prevSy), new PVector(sx, sy)));
     prevSx = sx;
     prevSy = sy;
@@ -145,7 +150,56 @@ void drawPauseScreen() {
   text(str, cameraX + width/2, cameraY + width/2 + 90);
 }
 
+void drawGameOverScreen() {
+  textAlign(CENTER, CENTER);
+  textSize(32);
+  fill(159,20,0);
+  text("Skate Park\nAfter Dark", cameraX + width/2, cameraY + height/4);
+  text("Game Over", cameraX + width/2, cameraY + height/2);
+
+  rectMode(CORNER);
+  float x = cameraX + width/2 - 65;
+  float y = cameraY + width/2 ;
+  float w = 130;
+  float h = 50;
+  if (overRect(x,y,w,h)) {
+    fill(12,160,20);
+    mouseOverRetryButton = true;
+  }
+  else {
+    fill(230,230,230);
+    mouseOverRetryButton = false;
+  }
+  rect(x, y, w, h);
+
+  fill(255);
+  String str = "Retry";
+  text(str, cameraX + width/2, cameraY + width/2 + 20);
+
+  y = cameraY + width/2 + 70;
+  if (overRect(x,y,w,h)) {
+    fill(12,160,20);
+    mouseOverExitButton = true;
+  }
+  else {
+    fill(230,230,230);
+    mouseOverExitButton = false;
+  }
+  rect(x, y, w, h);
+  fill(255);
+  str = "Exit";
+  text(str, cameraX + width/2, cameraY + width/2 + 90);
+}
+
+void drawUserInfo() {
+
+}
+
 void draw() {
+  List toRemove = collidableObjectList.stream().filter(e -> e instanceof Bullet).map(e -> (Bullet)e).filter(e -> e.life <= 0).collect(Collectors.toList());
+  collidableObjectList.removeAll(toRemove);
+  visibleObjectList.removeAll(toRemove);
+
   List<Contact> contactList = new ArrayList();
   for (int i=0; i<collidableObjectList.size(); i++) {
     for (int j=i+1; j<collidableObjectList.size(); j++) {
@@ -181,6 +235,11 @@ void draw() {
   if (pauseScreen) {
     drawPauseScreen();
     return;
+  }
+
+  if (player.getLives()<=0) {
+    //drawGameOverScreen();
+    //return;
   }
 
   for (VisibleObject visibleObject: visibleObjectList) {
@@ -243,12 +302,30 @@ void keyReleased() {
 void mouseReleased() {
   if (mouseOverStartButton) {
     startScreen = mouseOverStartButton = false;
-  }
-  if (mouseOverContinueButton) {
+  } else if (mouseOverContinueButton) {
     pauseScreen = mouseOverContinueButton = false;
-  }
-  if (mouseOverExitButton) {
+  } else if (mouseOverRetryButton) {
+    setup();
+  } else if (mouseOverExitButton) {
     exit();
+  } else {
+    fireBullets();
+  }
+
+}
+
+void fireBullets() {
+  if (player.bulletCount < 5) {
+    return;
+  }
+  player.bulletCount -= 5;
+  for (int i = 0; i < 5; i++) {
+    float angle = random(player.minAngle, player.maxAngle);
+    PVector dir = PVector.fromAngle(angle).setMag(100);
+    PVector pos = PVector.add(player.pos,dir);
+    Bullet b = new Bullet(pos, dir, 50);
+    visibleObjectList.add(b);
+    collidableObjectList.add(b);
   }
 }
 
