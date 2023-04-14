@@ -4,6 +4,7 @@ class Enemy extends Particle {
   float moveForce;
   PVector dir;
   int frameReaction;
+  
   public Enemy(PVector startPos, Player player, float moveForce, int frameReaction) {
     super(startPos, 100, 50);
     this.player = player;

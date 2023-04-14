@@ -1,6 +1,5 @@
 class Player extends Particle {
   int lives;
-  
   float moveForce;
   boolean isMovingLeft;
   boolean isMovingRight;
@@ -10,7 +9,7 @@ class Player extends Particle {
   public Player(PVector startPos) {
     super(startPos, 1000.0, 50);
     canMove = true;
-    
+    lives = 3;
     moveForce = 3000;
   }
   
@@ -45,6 +44,7 @@ class Player extends Particle {
   }
   
   void collideWith(Collidable other) {
+    lives--;
   }
   
   int getLives() {

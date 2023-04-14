@@ -3,9 +3,9 @@ import java.util.Optional;
 
 boolean startScreen = true,
         pauseScreen = false,
-        gameOverScreen = false,
         mouseOverStartButton = false,
         mouseOverContinueButton = false,
+        mouseOverRetryButton = false,
         mouseOverExitButton = false;
 
 PImage bgImage;
@@ -28,10 +28,17 @@ CollisionDetector collisionDetector;
 List<Enemy> enemies;
 
 void setup() {
-  fullScreen(); //<>//
-
+  fullScreen();  //<>//
+  startScreen = true;
+  pauseScreen = false;
+  mouseOverStartButton = false;
+  mouseOverContinueButton = false;
+  mouseOverRetryButton = false;
+  mouseOverExitButton = false;
+  
   bgImage = loadImage("bg.jpg");
-
+  round = 1;
+  
   mapWidth = 3.5 * displayWidth;
   mapHeight = 5 * displayHeight;
   
@@ -137,6 +144,51 @@ void drawPauseScreen() {
   text(str, cameraX + width/2, cameraY + width/2 + 90);
 }
 
+void drawGameOverScreen() {
+  textAlign(CENTER, CENTER);
+  textSize(32);
+  fill(159,20,0);
+  text("Skate Park\nAfter Dark", cameraX + width/2, cameraY + height/4);
+  text("Game Over", cameraX + width/2, cameraY + height/2);
+  
+  rectMode(CORNER);
+  float x = cameraX + width/2 - 65;
+  float y = cameraY + width/2 ;
+  float w = 130;
+  float h = 50;
+  if (overRect(x,y,w,h)) {
+    fill(12,160,20);
+    mouseOverRetryButton = true;
+  }
+  else {
+    fill(230,230,230);
+    mouseOverRetryButton = false;
+  }
+  rect(x, y, w, h);
+  
+  fill(255);
+  String str = "Retry";
+  text(str, cameraX + width/2, cameraY + width/2 + 20);
+  
+  y = cameraY + width/2 + 70;
+  if (overRect(x,y,w,h)) {
+    fill(12,160,20);
+    mouseOverExitButton = true;
+  }
+  else {
+    fill(230,230,230);
+    mouseOverExitButton = false;
+  }
+  rect(x, y, w, h);
+  fill(255);
+  str = "Exit";
+  text(str, cameraX + width/2, cameraY + width/2 + 90);
+}
+
+void drawUserInfo() {
+
+}
+
 void draw() {
   List<Contact> contactList = new ArrayList();
   for (int i=0; i<collidableObjectList.size(); i++) {
@@ -173,6 +225,10 @@ void draw() {
   if (pauseScreen) {
     drawPauseScreen();
     return;
+  }
+  
+  if (player.getLives()<=0) {
+    
   }
 
   for (VisibleObject visibleObject: visibleObjectList) {
@@ -239,9 +295,13 @@ void mouseReleased() {
   if (mouseOverContinueButton) {
     pauseScreen = mouseOverContinueButton = false;
   }
+  if (mouseOverRetryButton) {
+    setup();
+  }
   if (mouseOverExitButton) {
     exit();
   }
+  
 }
 
 boolean overRect(float x, float y, float w, float h) {
