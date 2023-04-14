@@ -29,7 +29,7 @@ class CollisionDetector {
       float penetrationDistance = circle.getRadius() - distance;
       
       if (penetrationDistance >= 0) {
-        return Optional.of(new Contact(circle, lineSegment, 0.7, lineSegment.getNormalVector(), penetrationDistance));
+        return Optional.of(new Contact(circle, lineSegment, 0.1, lineSegment.getNormalVector(), penetrationDistance));
       }
     }
     

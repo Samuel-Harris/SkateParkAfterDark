@@ -27,6 +27,8 @@ CollisionDetector collisionDetector;
 
 List<Enemy> enemies;
 
+PShape octagon;
+ //<>//
 void setup() {
   fullScreen(); //<>// //<>// //<>//
 
@@ -54,23 +56,26 @@ void setup() {
   collidableObjectList = new ArrayList();
   collidableObjectList.add(player);
   collidableObjectList.addAll(enemies);
-  collidableObjectList.add(lineSegment);
   
   collisionDetector = new CollisionDetector();
-}
-
-void drawOcatgon() {
-  float x = mapWidth/2;
-  float y = mapHeight/2;
-  float angle = TWO_PI / 8;
-  fill(0,150,60);
-  beginShape();
-  for (float a = 0; a < TWO_PI; a += angle) {
-    float sx = x + cos(a) * octagonRadius;
-    float sy = y + sin(a) * octagonRadius;
-    vertex(sx, sy);
+  
+  PVector octagonCentre = new PVector(mapWidth/2, mapHeight/2);
+  float EIGHTH_PI = PI / 8;
+  octagon = createShape();
+  octagon.beginShape();
+  octagon.fill(0,150,60);
+  float prevSx = octagonCentre.x + cos(-EIGHTH_PI) * octagonRadius;
+  float prevSy = octagonCentre.y + sin(-EIGHTH_PI) * octagonRadius;
+  for (int i=0; i<8; i++) {
+    float sx = octagonCentre.x + cos(i*QUARTER_PI+EIGHTH_PI) * octagonRadius;
+    float sy = octagonCentre.y + sin(i*QUARTER_PI+EIGHTH_PI) * octagonRadius;
+    octagon.vertex(sx, sy);
+    
+    collidableObjectList.add(new LineSegment(new PVector(prevSx, prevSy), new PVector(sx, sy)));
+    prevSx = sx;
+    prevSy = sy;
   }
-  endShape(CLOSE);
+  octagon.endShape(CLOSE);
 }
 
 void drawStartScreen() {
@@ -166,7 +171,7 @@ void draw() {
   //image(bgImage, 0, 0, mapWidth, mapHeight);
   fill(230);
   rect(0,0, mapWidth, mapHeight);
-  drawOcatgon();
+  shape(octagon, 0, 0);
 
   if (startScreen) {
     drawStartScreen();
