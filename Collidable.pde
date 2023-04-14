@@ -5,5 +5,9 @@ interface Collidable {
   
   PVector getVelocity();
   
+  float getMass();
+  
   float getInvMass();
+  
+  void addForce(PVector force);
 }

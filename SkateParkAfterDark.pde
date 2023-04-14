@@ -49,7 +49,7 @@ void setup() {
   
   enemies = new ArrayList();
   for (int i = 0; i < 3; i++) {
-    enemies.add(new Enemy(new PVector(mapWidth/2, mapHeight/2), player, int(random(100,200)), int(random(6,13))));
+    enemies.add(new Enemy(new PVector(mapWidth/2, mapHeight/2), player, int(random(2000,3000)), int(random(6,13))));
   }
   
   visibleObjectList = new ArrayList();
@@ -82,9 +82,9 @@ void drawStartScreen() {
   textSize(32);
   fill(159,20,0);
   text("Skate Park\nAfter Dark", cameraX + width/2, cameraY + height/2);
-  
+
   rectMode(CORNER);
-  
+
   float x = cameraX + width/2 - 50;
   float y = cameraY + width/2 ;
   float w = 100;
@@ -109,7 +109,7 @@ void drawPauseScreen() {
   fill(159,20,0);
   text("Skate Park\nAfter Dark", cameraX + width/2, cameraY + height/4);
   text("Game Paused", cameraX + width/2, cameraY + height/2);
-  
+
   rectMode(CORNER);
   float x = cameraX + width/2 - 65;
   float y = cameraY + width/2 ;
@@ -124,11 +124,11 @@ void drawPauseScreen() {
     mouseOverContinueButton = false;
   }
   rect(x, y, w, h);
-  
+
   fill(255);
   String str = "Continue";
   text(str, cameraX + width/2, cameraY + width/2 + 20);
-  
+
   y = cameraY + width/2 + 70;
   if (overRect(x,y,w,h)) {
     fill(12,160,20);
@@ -221,7 +221,7 @@ void draw() {
     drawStartScreen();
     return;
   }
-  
+
   if (pauseScreen) {
     drawPauseScreen();
     return;
@@ -284,7 +284,7 @@ void keyReleased() {
     case TAB:
       pauseScreen = true;
       break;
-      
+
   }
 }
 
@@ -306,4 +306,4 @@ void mouseReleased() {
 
 boolean overRect(float x, float y, float w, float h) {
   return cameraX+mouseX>=x && cameraX+mouseX<=x+w && cameraY+mouseY>=y && cameraY+mouseY <=y+h;
-} 
+}

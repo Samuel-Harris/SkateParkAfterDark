@@ -1,12 +1,13 @@
 class Enemy extends Particle {
   boolean isColliding;
+  
   Player player;
   float moveForce;
   PVector dir;
   int frameReaction;
   
   public Enemy(PVector startPos, Player player, float moveForce, int frameReaction) {
-    super(startPos, 100, 50);
+    super(startPos, 1500, 50);
     this.player = player;
     this.moveForce = moveForce;
     this.frameReaction = frameReaction;
@@ -19,7 +20,11 @@ class Enemy extends Particle {
     }
     dir.normalize();
     addForce(dir.mult(moveForce));
-    integrate();
+
+    if (canMove) {
+      integrate();
+    }
+
     if (isColliding) {
       fill(0, 255, 0);
       isColliding = false;

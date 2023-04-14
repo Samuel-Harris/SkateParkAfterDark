@@ -15,6 +15,7 @@ abstract class Particle implements VisibleObject, Circle {
     invMass = 1.0/mass;
     
     this.radius = radius;
+    canMove = true;
   }
   
   abstract void draw();
@@ -38,6 +39,10 @@ abstract class Particle implements VisibleObject, Circle {
   
   PVector getVelocity() {
     return PVector.sub(prevPos, pos);
+  }
+  
+  float getMass() {
+    return mass;
   }
   
   float getInvMass() {

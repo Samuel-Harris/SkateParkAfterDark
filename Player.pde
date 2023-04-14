@@ -10,6 +10,7 @@ class Player extends Particle {
     super(startPos, 1000.0, 50);
     canMove = true;
     lives = 3;
+    
     moveForce = 3000;
   }
   
