@@ -28,7 +28,7 @@ CollisionDetector collisionDetector;
 List<Enemy> enemies;
 
 void setup() {
-  fullScreen(); //<>// //<>//
+  fullScreen(); //<>// //<>// //<>//
 
   bgImage = loadImage("bg.jpg");
 
@@ -45,13 +45,16 @@ void setup() {
     enemies.add(new Enemy(new PVector(mapWidth/2, mapHeight/2), player, int(random(2000,3000)), int(random(6,13))));
   }
   
+  
   visibleObjectList = new ArrayList();
   visibleObjectList.add(player);
   visibleObjectList.addAll(enemies);
   
+  
   collidableObjectList = new ArrayList();
   collidableObjectList.add(player);
   collidableObjectList.addAll(enemies);
+  collidableObjectList.add(lineSegment);
   
   collisionDetector = new CollisionDetector();
 }
