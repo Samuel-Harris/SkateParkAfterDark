@@ -1,14 +1,13 @@
 class Enemy extends Particle {
   boolean isColliding;
   
-  public Enemy() {
-    super(new PVector(3 * displayWidth/2 - 200, 3 * displayHeight/2 - 200), 1500, 50);
   Player player;
   float moveForce;
   PVector dir;
   int frameReaction;
+  
   public Enemy(PVector startPos, Player player, float moveForce, int frameReaction) {
-    super(startPos, 100, 50);
+    super(startPos, 1500, 50);
     this.player = player;
     this.moveForce = moveForce;
     this.frameReaction = frameReaction;
