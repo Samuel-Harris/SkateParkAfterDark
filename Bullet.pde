@@ -1,10 +1,12 @@
 class Bullet extends Particle {
   int life;
+  int damage;
   PVector velocity;
-  Bullet(PVector pos, PVector dir, int life) {
+  Bullet(PVector pos, PVector dir, int life, int damage) {
     super(pos, 50.0, 10);
     this.velocity = dir.setMag(10);
     this.life = life;
+    this.damage = damage;
   }
   
   public void draw() {
@@ -16,7 +18,16 @@ class Bullet extends Particle {
   }
   
   void collideWith(Collidable other) {
-    if (other instanceof Bullet) return;
+    if (other instanceof Bullet || other instanceof Player) return;
+    if (other instanceof Enemy) {
+      Enemy enemy = (Enemy)other;
+      enemy.health -= damage;
+      
+      float drawWidth = ((float)enemy.health / (float)enemy.MAX_HEALTH) * 50;
+      print(enemy.health);
+      print(enemy.MAX_HEALTH);
+      println(drawWidth);
+    }
     life = 0;
   }
 }

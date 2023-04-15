@@ -28,7 +28,7 @@ CollisionDetector collisionDetector;
 List<Enemy> enemies;
 
 PShape octagon;
-
+ //<>//
 void setup() {
   fullScreen();
   startScreen = true;
@@ -51,7 +51,7 @@ void setup() {
   
   enemies = new ArrayList();
   for (int i = 0; i < 3; i++) {
-    enemies.add(new Enemy(new PVector(mapWidth/3, mapHeight/3), player, int(random(2000,3000)), int(random(6,13))));
+    enemies.add(new Enemy(new PVector(mapWidth/3, mapHeight/3), player, int(random(2000,3000)), int(random(6,13)), 500));
   }
   
   visibleObjectList = new ArrayList();
@@ -196,10 +196,15 @@ void drawUserInfo() {
 }
 
 void draw() {
+  // this can be optimised by just removing the bullet and enemy from the collidableObjectList & visibleObjectList direclty from the collideWith class, however not the best coding practice
   List toRemove = collidableObjectList.stream().filter(e -> e instanceof Bullet).map(e -> (Bullet)e).filter(e -> e.life <= 0).collect(Collectors.toList());
   collidableObjectList.removeAll(toRemove);
   visibleObjectList.removeAll(toRemove);
-
+  
+  toRemove = enemies.stream().filter(e -> e.health <= 0).collect(Collectors.toList());
+  collidableObjectList.removeAll(toRemove);
+  visibleObjectList.removeAll(toRemove);
+  
   List<Contact> contactList = new ArrayList();
   for (int i=0; i<collidableObjectList.size(); i++) {
     for (int j=i+1; j<collidableObjectList.size(); j++) {
@@ -214,6 +219,9 @@ void draw() {
   }
   
   for (Contact contact: contactList) {
+    if (contact.collidableA instanceof Bullet && contact.collidableB instanceof Bullet) continue; 
+    if (contact.collidableA instanceof Bullet && contact.collidableB instanceof Player) continue; 
+    if (contact.collidableA instanceof Player && contact.collidableB instanceof Bullet) continue; 
     contact.resolve();
   }
   
@@ -321,9 +329,9 @@ void fireBullets() {
   player.bulletCount -= 5;
   for (int i = 0; i < 5; i++) {
     float angle = random(player.minAngle, player.maxAngle);
-    PVector dir = PVector.fromAngle(angle).setMag(100);
+    PVector dir = PVector.fromAngle(angle).setMag(50);
     PVector pos = PVector.add(player.pos,dir);
-    Bullet b = new Bullet(pos, dir, 50);
+    Bullet b = new Bullet(pos, dir, 50,25);
     visibleObjectList.add(b);
     collidableObjectList.add(b);
   }

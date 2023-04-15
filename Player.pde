@@ -62,7 +62,6 @@ class Player extends Particle {
   
   void collideWith(Collidable other) {
     lives--;
-    println(lives);
   }
   
   int getLives() {
