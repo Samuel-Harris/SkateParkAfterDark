@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 
 class Player extends Particle {
   int lives;
+  int maxLives;
   int bulletCount;
   float moveForce;
   boolean isMovingLeft;
@@ -15,7 +16,8 @@ class Player extends Particle {
   public Player(PVector startPos) {
     super(startPos, 1000.0, 50);
     canMove = true;
-    lives = 3;
+    maxLives = 3;
+    lives = maxLives;
     minAngle = 0;
     maxAngle = 0;
     moveForce = 3000;
@@ -66,6 +68,10 @@ class Player extends Particle {
   
   int getLives() {
     return lives;
+  }
+  
+  int getMaxLives() {
+    return maxLives;
   }
   
   void stopMoving() {

@@ -28,8 +28,13 @@ CollisionDetector collisionDetector;
 List<Enemy> enemies;
 int enemyCount;
 
-PShape octagon; //<>//
+PShape octagon;
+
+HUD hud;
+
 void setup() {
+  imageMode(CENTER);
+
   fullScreen();
   startScreen = true;
   pauseScreen = false;
@@ -40,9 +45,9 @@ void setup() {
 
   mapWidth = 5 * displayWidth;
   mapHeight = 5 * displayHeight;
-  
+
   player = new Player(new PVector(mapWidth/2, mapHeight/2));
-  
+
   roundGenerator();
 
 }
@@ -70,12 +75,14 @@ void roundGenerator() {
   visibleObjectList.add(player);
   visibleObjectList.addAll(enemies);
   
+  hud = new HUD(player);
+
   collidableObjectList = new ArrayList();
   collidableObjectList.add(player);
   collidableObjectList.addAll(enemies);
   
   collisionDetector = new CollisionDetector();
-  
+
   PVector octagonCentre = new PVector(mapWidth/2, mapHeight/2);
   float EIGHTH_PI = PI / 8;
   octagon = createShape();
@@ -226,7 +233,6 @@ void drawGameOverScreen() {
 
 
 void draw() {
-  
   // this can be optimised by just removing the bullet and enemy from the collidableObjectList & visibleObjectList direclty from the collideWith class, however not the best coding practice
   List toRemove = collidableObjectList.stream().filter(e -> e instanceof Bullet).map(e -> (Bullet)e).filter(e -> e.life <= 0).collect(Collectors.toList());
   collidableObjectList.removeAll(toRemove);
@@ -258,7 +264,7 @@ void draw() {
   }
   
   cameraX = player.pos.x - displayWidth/2;
-  cameraY = player.pos.y- displayHeight/2;
+  cameraY = player.pos.y - displayHeight/2;
 
   translate(-cameraX, -cameraY);
 
@@ -281,7 +287,7 @@ void draw() {
     //drawGameOverScreen();
     //return;
   }
-  
+
   if (enemies.isEmpty()) {
      transitionScreen();
    }
@@ -292,6 +298,8 @@ void draw() {
   
   
   translate(cameraX, cameraY);
+
+  hud.draw();
 }
 
 void keyPressed() {
@@ -367,7 +375,7 @@ void fireBullets() {
     float angle = random(player.minAngle, player.maxAngle);
     PVector dir = PVector.fromAngle(angle).setMag(50);
     PVector pos = PVector.add(player.pos,dir);
-    Bullet b = new Bullet(pos, dir, 50,25);
+    Bullet b = new Bullet(pos, dir, 10, 100);
     visibleObjectList.add(b);
     collidableObjectList.add(b);
   }
