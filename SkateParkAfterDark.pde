@@ -284,8 +284,8 @@ void draw() {
   }
 
   if (player.getLives()<=0) {
-    //drawGameOverScreen();
-    //return;
+    drawGameOverScreen();
+    return;
   }
 
   if (enemies.isEmpty()) {
