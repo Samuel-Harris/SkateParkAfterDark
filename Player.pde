@@ -11,6 +11,8 @@ class Player extends Particle {
   boolean isMovingRight;
   boolean isMovingUp;
   boolean isMovingDown;
+  int hitInvulnerabilityFrames;
+  int hitInvulnerabilityFramesLeft;
   float minAngle,maxAngle;
   
   public Player(PVector startPos) {
@@ -22,6 +24,8 @@ class Player extends Particle {
     maxAngle = 0;
     moveForce = 3000;
     bulletCount = 500;
+    hitInvulnerabilityFrames = 30;
+    hitInvulnerabilityFramesLeft = 0;
   }
   
   void draw() {
@@ -49,7 +53,18 @@ class Player extends Particle {
       integrate();
     }
     
-    fill(0);
+    if (hitInvulnerabilityFramesLeft > 0) {
+      hitInvulnerabilityFramesLeft--;
+      
+      if ((hitInvulnerabilityFramesLeft / 4) % 2 == 0) {
+        fill(0);
+      } else {
+        fill(255);
+      }
+    } else { 
+      fill(0);
+    }
+    
     stroke(0);
     circle(pos.x, pos.y, 2*radius);
     float angle = atan2(cameraY+mouseY - pos.y, cameraX+mouseX - pos.x );
@@ -62,9 +77,18 @@ class Player extends Particle {
     
   }
   
+  float getHitInvulnerabilityFrames() {
+    return (float) hitInvulnerabilityFrames;
+  }
+  
+  float getHitInvulnerabilityFramesLeft() {
+    return (float) hitInvulnerabilityFramesLeft;
+  }
+  
   void collideWith(Collidable other) {
-    if (other instanceof Enemy && lives > 0) {
+    if (other instanceof Enemy && lives > 0 && hitInvulnerabilityFramesLeft == 0) {
       lives--;
+      hitInvulnerabilityFramesLeft = hitInvulnerabilityFrames;
     }
   }
   
