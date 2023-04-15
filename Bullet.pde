@@ -4,7 +4,7 @@ class Bullet extends Particle {
   PVector velocity;
   Bullet(PVector pos, PVector dir, int life, int damage) {
     super(pos, 50.0, 10);
-    this.velocity = dir.setMag(10);
+    this.velocity = dir.setMag(30);
     this.life = life;
     this.damage = damage;
   }
@@ -24,9 +24,6 @@ class Bullet extends Particle {
       enemy.health -= damage;
       
       float drawWidth = ((float)enemy.health / (float)enemy.MAX_HEALTH) * 50;
-      print(enemy.health);
-      print(enemy.MAX_HEALTH);
-      println(drawWidth);
     }
     life = 0;
   }

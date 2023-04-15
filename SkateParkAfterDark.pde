@@ -28,8 +28,12 @@ CollisionDetector collisionDetector;
 List<Enemy> enemies;
 
 PShape octagon;
- //<>//
+
+HUD hud;
+
 void setup() {
+  imageMode(CENTER);
+  
   fullScreen();
   startScreen = true;
   pauseScreen = false;
@@ -38,7 +42,7 @@ void setup() {
   mouseOverRetryButton = false;
   mouseOverExitButton = false;
 
-  bgImage = loadImage("bg.jpg");
+  //bgImage = loadImage("bg.jpg");
   round = 1;
 
   mapWidth = 5 * displayWidth;
@@ -57,6 +61,8 @@ void setup() {
   visibleObjectList = new ArrayList();
   visibleObjectList.add(player);
   visibleObjectList.addAll(enemies);
+  
+  hud = new HUD(player);
   
   collidableObjectList = new ArrayList();
   collidableObjectList.add(player);
@@ -226,7 +232,7 @@ void draw() {
   }
   
   cameraX = player.pos.x - displayWidth/2;
-  cameraY = player.pos.y- displayHeight/2;
+  cameraY = player.pos.y - displayHeight/2;
 
   translate(-cameraX, -cameraY);
 
@@ -256,6 +262,8 @@ void draw() {
   
   
   translate(cameraX, cameraY);
+  
+  hud.draw();
 }
 
 void keyPressed() {
@@ -331,7 +339,7 @@ void fireBullets() {
     float angle = random(player.minAngle, player.maxAngle);
     PVector dir = PVector.fromAngle(angle).setMag(50);
     PVector pos = PVector.add(player.pos,dir);
-    Bullet b = new Bullet(pos, dir, 50,25);
+    Bullet b = new Bullet(pos, dir, 10, 100);
     visibleObjectList.add(b);
     collidableObjectList.add(b);
   }
