@@ -112,10 +112,10 @@ void transitionScreen() {
      // add sound here
    }
    else if (transitionCounter < 150) {
-     text("I", cameraX + 30, cameraY +  50);
+     text("I", 30, 50);
    }
    else if (transitionCounter < 300) {
-     text("I I", cameraX + 30, cameraY + 50);
+     text("I I", 30, 50);
    }
    else {
      // add sound here as well
@@ -288,16 +288,15 @@ void draw() {
     return;
   }
 
-  if (enemies.isEmpty()) {
-     transitionScreen();
-   }
-
   for (VisibleObject visibleObject: visibleObjectList) {
     visibleObject.draw();
   }
   
-  
   translate(cameraX, cameraY);
+
+  if (enemies.isEmpty()) {
+     transitionScreen();
+   }
 
   hud.draw();
 }
