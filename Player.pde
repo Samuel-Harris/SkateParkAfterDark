@@ -63,7 +63,9 @@ class Player extends Particle {
   }
   
   void collideWith(Collidable other) {
-    lives--;
+    if (other instanceof Enemy && lives > 0) {
+      lives--;
+    }
   }
   
   int getLives() {
