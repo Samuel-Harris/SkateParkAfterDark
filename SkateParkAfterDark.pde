@@ -9,7 +9,8 @@ boolean startScreen = true,
         mouseOverExitButton = false;
 
 
-int round = 0;
+int round = 0,
+    transitionCounter = 0;
 
 float mapWidth,
       mapHeight,
@@ -27,8 +28,8 @@ CollisionDetector collisionDetector;
 List<Enemy> enemies;
 int enemyCount;
 
-PShape octagon;
-void setup() { //<>//
+PShape octagon; //<>//
+void setup() {
   fullScreen();
   startScreen = true;
   pauseScreen = false;
@@ -40,14 +41,16 @@ void setup() { //<>//
   mapWidth = 5 * displayWidth;
   mapHeight = 5 * displayHeight;
   
+  player = new Player(new PVector(mapWidth/2, mapHeight/2));
+  
   roundGenerator();
 
 }
 
 void roundGenerator() {
   round++;
+  transitionCounter = 0;
   enemyCount = ceil(1.5 * round);
-  player = new Player(new PVector(mapWidth/2, mapHeight/2));
 
   cameraX = player.pos.x - displayWidth/2;
   cameraY = player.pos.y - displayHeight/2;
@@ -91,6 +94,26 @@ void roundGenerator() {
   }
   octagon.endShape(CLOSE);
 
+}
+
+void transitionScreen() {
+   transitionCounter++;
+   textAlign(CENTER, CENTER);
+   textSize(52);
+   fill(159,20,0);
+   if (transitionCounter == 0) {
+     // add sound here
+   }
+   else if (transitionCounter < 150) {
+     text("I", cameraX + 30, cameraY + height - 50);
+   }
+   else if (transitionCounter < 300) {
+     text("I I", cameraX + 30, cameraY + height - 50);
+   }
+   else {
+     // add sound here as well
+     roundGenerator();
+   }
 }
 
 void drawStartScreen() {
@@ -201,11 +224,9 @@ void drawGameOverScreen() {
   text(str, cameraX + width/2, cameraY + width/2 + 90);
 }
 
-void drawUserInfo() {
-
-}
 
 void draw() {
+  
   // this can be optimised by just removing the bullet and enemy from the collidableObjectList & visibleObjectList direclty from the collideWith class, however not the best coding practice
   List toRemove = collidableObjectList.stream().filter(e -> e instanceof Bullet).map(e -> (Bullet)e).filter(e -> e.life <= 0).collect(Collectors.toList());
   collidableObjectList.removeAll(toRemove);
@@ -213,7 +234,6 @@ void draw() {
   
   toRemove = enemies.stream().filter(e -> e.health <= 0).collect(Collectors.toList());
   enemies.removeAll(toRemove);
-  if (enemies.isEmpty()) roundGenerator();
   collidableObjectList.removeAll(toRemove);
   visibleObjectList.removeAll(toRemove);
   
@@ -261,6 +281,10 @@ void draw() {
     //drawGameOverScreen();
     //return;
   }
+  
+  if (enemies.isEmpty()) {
+     transitionScreen();
+   }
 
   for (VisibleObject visibleObject: visibleObjectList) {
     visibleObject.draw();
