@@ -8,9 +8,8 @@ boolean startScreen = true,
         mouseOverRetryButton = false,
         mouseOverExitButton = false;
 
-PImage bgImage;
 
-int round = 1;
+int round = 0;
 
 float mapWidth,
       mapHeight,
@@ -26,10 +25,10 @@ List<Collidable> collidableObjectList;
 CollisionDetector collisionDetector;
 
 List<Enemy> enemies;
+int enemyCount;
 
 PShape octagon;
- //<>//
-void setup() {
+void setup() { //<>//
   fullScreen();
   startScreen = true;
   pauseScreen = false;
@@ -38,20 +37,30 @@ void setup() {
   mouseOverRetryButton = false;
   mouseOverExitButton = false;
 
-  bgImage = loadImage("bg.jpg");
-  round = 1;
-
   mapWidth = 5 * displayWidth;
   mapHeight = 5 * displayHeight;
+  
+  roundGenerator();
 
+}
+
+void roundGenerator() {
+  round++;
+  enemyCount = ceil(1.5 * round);
   player = new Player(new PVector(mapWidth/2, mapHeight/2));
 
   cameraX = player.pos.x - displayWidth/2;
   cameraY = player.pos.y - displayHeight/2;
   
   enemies = new ArrayList();
-  for (int i = 0; i < 3; i++) {
-    enemies.add(new Enemy(new PVector(mapWidth/3, mapHeight/3), player, int(random(2000,3000)), int(random(6,13)), 500));
+  for (int i = 0; i < enemyCount; i++) {
+    float enX = random(mapWidth);
+    float enY = random(mapHeight);
+    while (dist(enX, enY, player.pos.x, player.pos.y)<2*displayWidth) {
+      enX = random(mapWidth);
+      enY = random(mapHeight);
+    }
+    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000,3000)), int(random(6,13)), 500));
   }
   
   visibleObjectList = new ArrayList();
@@ -63,7 +72,7 @@ void setup() {
   collidableObjectList.addAll(enemies);
   
   collisionDetector = new CollisionDetector();
-
+  
   PVector octagonCentre = new PVector(mapWidth/2, mapHeight/2);
   float EIGHTH_PI = PI / 8;
   octagon = createShape();
@@ -81,6 +90,7 @@ void setup() {
     prevSy = sy;
   }
   octagon.endShape(CLOSE);
+
 }
 
 void drawStartScreen() {
@@ -202,6 +212,8 @@ void draw() {
   visibleObjectList.removeAll(toRemove);
   
   toRemove = enemies.stream().filter(e -> e.health <= 0).collect(Collectors.toList());
+  enemies.removeAll(toRemove);
+  if (enemies.isEmpty()) roundGenerator();
   collidableObjectList.removeAll(toRemove);
   visibleObjectList.removeAll(toRemove);
   
