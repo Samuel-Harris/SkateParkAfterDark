@@ -105,10 +105,10 @@ void transitionScreen() {
      // add sound here
    }
    else if (transitionCounter < 150) {
-     text("I", cameraX + 30, cameraY + height - 50);
+     text("I", cameraX + 30, cameraY +  50);
    }
    else if (transitionCounter < 300) {
-     text("I I", cameraX + 30, cameraY + height - 50);
+     text("I I", cameraX + 30, cameraY + 50);
    }
    else {
      // add sound here as well
