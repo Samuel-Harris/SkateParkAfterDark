@@ -10,7 +10,7 @@ boolean startScreen = true,
 
 
 int round = 0,
-    transitionCounter = 0;
+    transitionCounter = 0, incre, fade;
 
 float mapWidth,
       mapHeight,
@@ -28,7 +28,7 @@ CollisionDetector collisionDetector;
 List<Enemy> enemies;
 int enemyCount;
 
-PShape octagon;
+PShape octagon; //<>//
 
 HUD hud;
 
@@ -53,6 +53,8 @@ void setup() {
 }
 
 void roundGenerator() {
+  incre = -10;
+  fade = 200;
   round++;
   transitionCounter = 0;
   enemyCount = ceil(1.5 * round);
@@ -107,7 +109,10 @@ void transitionScreen() {
    transitionCounter++;
    textAlign(CENTER, CENTER);
    textSize(52);
-   fill(159,20,0);
+   if (fade >= 200) incre = -10;   
+   else if (fade <= 50) incre = 10;
+   fade += incre;
+   fill(159,20,0, fade);
    if (transitionCounter == 0) {
      // add sound here
    }
