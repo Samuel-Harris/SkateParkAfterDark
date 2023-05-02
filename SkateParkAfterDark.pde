@@ -8,11 +8,11 @@ boolean startScreen = true,
   mouseOverContinueButton = false,
   mouseOverRetryButton = false,
   mouseOverExitButton = false, 
-        controlOpen = true;
+  controlOpen = true;
 
 
 int round = 0,
-  transitionCounter = 0, incre, fade;
+  transitionCounter = 0, incre, fade, bulletRefillCount = 0;
 
 float mapWidth,
   mapHeight,
@@ -28,8 +28,7 @@ List<Collidable> collidableObjectList;
 CollisionDetector collisionDetector;
 
 List<Enemy> enemies;
-int enemyCount; //<>//
- //<>//
+int enemyCount;  //<>//
 PShape octagon;
 
 HUD hud;
@@ -342,6 +341,13 @@ void draw() {
   if (enemies.isEmpty()) {
     transitionScreen();
   }
+  
+  if (!controlOpen) {
+    if (bulletRefillCount%30 == 0) {
+      player.bulletCount += 5;
+    }
+    bulletRefillCount++;
+  }
 
   hud.draw();
 }
@@ -378,7 +384,10 @@ void GetClosestPoint(Rail r, Particle p){
 
 void getOffRail(List<Particle> ps) {
   for (Particle p : ps){
-    if (p instanceof Player) controlOpen = true;
+    if (p instanceof Player) {
+      controlOpen = true;
+      bulletRefillCount = 0;
+    }
     p.state = ParticleMovementState.DEFAULT;
     p.trickForce = null;
   }
