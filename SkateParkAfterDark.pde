@@ -368,14 +368,16 @@ void getOnTheRail(Particle p, Rail rai) {
   float d = PVector.dot(dir, rai.getNormalisedVector());
   p.state = d>0 ? ParticleMovementState.RAILLEFT: ParticleMovementState.RAILRIGHT;
   d *= -500; 
+  float maxSpeed = 3000;
+  float minSpeed = 1500;
   println(d);
-  if (abs(d) < 7000) {
-    if (d<0) d = -7000;
-    else d = 7000;
+  if (abs(d) < minSpeed) {
+    if (d<0) d = -minSpeed;
+    else d = minSpeed;
   }
-  else if (abs(d) > 10000) {
-    if (d<0) d = -10000;
-    else d = 10000;
+  else if (abs(d) > maxSpeed) {
+    if (d<0) d = -maxSpeed;
+    else d = maxSpeed;
   }
   p.trickForce = rai.getNormalisedVector().copy().setMag(d);
   GetClosestPoint(rai,p);
