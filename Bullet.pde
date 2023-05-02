@@ -18,12 +18,10 @@ class Bullet extends Particle {
   }
   
   void collideWith(Collidable other) {
-    if (other instanceof Bullet || other instanceof Player) return;
+    if (other instanceof Bullet || other instanceof Player || other instanceof LineSegment) return;
     if (other instanceof Enemy) {
       Enemy enemy = (Enemy)other;
       enemy.health -= damage;
-      
-      float drawWidth = ((float)enemy.health / (float)enemy.MAX_HEALTH) * 50;
     }
     life = 0;
   }

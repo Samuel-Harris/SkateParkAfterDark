@@ -7,11 +7,12 @@ boolean startScreen = true,
   mouseOverStartButton = false,
   mouseOverContinueButton = false,
   mouseOverRetryButton = false,
-  mouseOverExitButton = false;
+  mouseOverExitButton = false, 
+  controlOpen = true;
 
 
 int round = 0,
-  transitionCounter = 0;
+  transitionCounter = 0, incre, fade, bulletRefillCount = 0;
 
 float mapWidth,
   mapHeight,
@@ -27,8 +28,7 @@ List<Collidable> collidableObjectList;
 CollisionDetector collisionDetector;
 
 List<Enemy> enemies;
-int enemyCount;
-
+int enemyCount;  //<>//
 PShape octagon;
 
 HUD hud;
@@ -67,6 +67,8 @@ void reset() {
 }
 
 void roundGenerator() {
+  incre = -10;
+  fade = 200;
   round++;
   transitionCounter = 0;
   enemyCount = ceil(1.5 * round);
@@ -114,23 +116,33 @@ void roundGenerator() {
     prevSy = sy;
   }
   octagon.endShape(CLOSE);
+
+  Rail rs = new Rail(new PVector(mapWidth/2, mapHeight/3), new PVector(mapWidth/3, mapHeight/2));
+  collidableObjectList.add(rs);
+  visibleObjectList.add(rs);
 }
 
 void transitionScreen() {
-  transitionCounter++;
-  textAlign(CENTER, CENTER);
-  textSize(52);
-  fill(159, 20, 0);
-  if (transitionCounter == 0) {
-    // add sound here
-  } else if (transitionCounter < 150) {
-    text("I", 30, 50);
-  } else if (transitionCounter < 300) {
-    text("I I", 30, 50);
-  } else {
-    // add sound here as well
-    roundGenerator();
-  }
+   transitionCounter++;
+   textAlign(CENTER, CENTER);
+   textSize(52);
+   if (fade >= 200) incre = -10;   
+   else if (fade <= 50) incre = 10;
+   fade += incre;
+   fill(159,20,0, fade);
+   if (transitionCounter == 0) {
+     // add sound here
+   }
+   else if (transitionCounter < 150) {
+     text("I", 30, 50);
+   }
+   else if (transitionCounter < 300) {
+     text("I I", 30, 50);
+   }
+   else {
+     // add sound here as well
+     roundGenerator();
+   }
 }
 
 void drawStartScreen() {
@@ -236,7 +248,6 @@ void drawGameOverScreen() {
   text(str, cameraX + width/2, cameraY + width/2 + 90);
 }
 
-
 void draw() {
   if (!backgroundMusic.isPlaying()) {
     backgroundMusic.loop();
@@ -264,11 +275,44 @@ void draw() {
       }
     }
   }
+  List<Particle> contactListWithParticleCollidingWithRails1 = contactList.stream()
+                                                            .filter(e -> e.collidableA instanceof Rail && e.collidableB instanceof Particle)
+                                                            .map(e -> (Particle)e.collidableB)
+                                                            .collect(Collectors.toList());
+  List<Particle> contactListWithParticleCollidingWithRails2 = contactList.stream()
+                                                            .filter(e -> e.collidableB instanceof Rail && e.collidableA instanceof Particle)
+                                                            .map(e -> (Particle)e.collidableA)
+                                                            .collect(Collectors.toList());
+  contactListWithParticleCollidingWithRails1.addAll(contactListWithParticleCollidingWithRails2);
+  List<Particle> esfce = collidableObjectList.stream()
+                          .filter(e -> e instanceof Particle)
+                          .map(e -> (Particle)e)
+                          .filter(e -> e.state != ParticleMovementState.DEFAULT)
+                          .filter(e -> !contactListWithParticleCollidingWithRails1.contains(e))
+                          .collect(Collectors.toList());
+  getOffRail(esfce);
+  for (Contact contact: contactList) {
+    if (contact.collidableA instanceof Bullet && contact.collidableB instanceof Bullet) continue; 
+    if (contact.collidableA instanceof Bullet && contact.collidableB instanceof Player) continue; 
+    if (contact.collidableA instanceof Player && contact.collidableB instanceof Bullet) continue; 
 
-  for (Contact contact : contactList) {
-    if (contact.collidableA instanceof Bullet && contact.collidableB instanceof Bullet) continue;
-    if (contact.collidableA instanceof Bullet && contact.collidableB instanceof Player) continue;
-    if (contact.collidableA instanceof Player && contact.collidableB instanceof Bullet) continue;
+    if (contact.collidableA instanceof Rail && contact.collidableB instanceof Particle) {
+      Rail rai = (Rail) contact.collidableA;
+      Particle p = (Particle) contact.collidableB;
+      if (p.state == ParticleMovementState.DEFAULT) {
+         getOnTheRail(p,rai);
+      }
+      contact.collidableB.addForce(p.trickForce);
+      continue; 
+    } else if (contact.collidableB instanceof Rail && contact.collidableA instanceof Particle) {
+      Rail rai = (Rail) contact.collidableB;
+      Particle p = (Particle) contact.collidableA;
+      if (p.state == ParticleMovementState.DEFAULT) {
+        getOnTheRail(p,rai);
+      }
+      contact.collidableA.addForce(p.trickForce);
+      continue; 
+    }
     contact.resolve();
   }
 
@@ -293,8 +337,8 @@ void draw() {
   }
 
   if (player.getLives()<=0) {
-    drawGameOverScreen();
-    return;
+    //drawGameOverScreen();
+    //return;
   }
 
   for (VisibleObject visibleObject : visibleObjectList) {
@@ -306,28 +350,85 @@ void draw() {
   if (enemies.isEmpty()) {
     transitionScreen();
   }
+  
+  if (!controlOpen) {
+    if (bulletRefillCount%30 == 0) {
+      player.bulletCount += 5;
+    }
+    bulletRefillCount++;
+  }
 
   hud.draw();
 }
 
+void getOnTheRail(Particle p, Rail rai) {
+  if (p instanceof Player) stopPlayerFromMoving();
+  p.forceAccumulator = new PVector(0,0);
+  PVector dir = p.getVelocity();
+  float d = PVector.dot(dir, rai.getNormalisedVector());
+  p.state = d>0 ? ParticleMovementState.RAILLEFT: ParticleMovementState.RAILRIGHT;
+  d *= -500; 
+  println(d);
+  if (abs(d) < 7000) {
+    if (d<0) d = -7000;
+    else d = 7000;
+  }
+  else if (abs(d) > 10000) {
+    if (d<0) d = -10000;
+    else d = 10000;
+  }
+  p.trickForce = rai.getNormalisedVector().copy().setMag(d);
+  GetClosestPoint(rai,p);
+  p.prevPos = p.pos.copy();
+}
+
+void GetClosestPoint(Rail r, Particle p){
+  PVector a_to_p = new PVector(p.pos.x - r.startPoint.x, p.pos.y - r.startPoint.y);
+  PVector a_to_b = new PVector(r.endPoint.x - r.startPoint.x, r.endPoint.y - r.startPoint.y);
+  float atb2 = a_to_b.x*a_to_b.x + a_to_b.y*a_to_b.y;
+  float atp_dot_atb = a_to_p.x*a_to_b.x + a_to_p.y*a_to_b.y;
+  float t = atp_dot_atb / atb2;
+  p.pos = new PVector(r.startPoint.x + a_to_b.x*t, r.startPoint.y + a_to_b.y*t );
+}
+
+void getOffRail(List<Particle> ps) {
+  for (Particle p : ps){
+    if (p instanceof Player) {
+      controlOpen = true;
+      bulletRefillCount = 0;
+    }
+    p.state = ParticleMovementState.DEFAULT;
+    p.trickForce = null;
+  }
+}
+void stopPlayerFromMoving() {
+  controlOpen = false;
+  player.stopMovingUp();
+  player.stopMovingLeft();
+  player.stopMovingDown();
+  player.stopMovingRight();
+}
+
 void keyPressed() {
-  switch (key) {
-  case 'w':
-  case 'W':
-    player.startMovingUp();
-    break;
-  case 'a':
-  case 'A':
-    player.startMovingLeft();
-    break;
-  case 's':
-  case 'S':
-    player.startMovingDown();
-    break;
-  case 'd':
-  case 'D':
-    player.startMovingRight();
-    break;
+  if (controlOpen) {
+    switch (key) {
+      case 'w':
+      case 'W':
+        player.startMovingUp();
+        break;
+      case 'a':
+      case 'A':
+        player.startMovingLeft();
+        break;
+      case 's':
+      case 'S':
+        player.startMovingDown();
+        break;
+      case 'd':
+      case 'D':
+        player.startMovingRight();
+        break;
+    }
   }
 }
 

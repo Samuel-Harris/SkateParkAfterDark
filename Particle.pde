@@ -6,16 +6,17 @@ abstract class Particle implements VisibleObject, Circle {
   float invMass;
   boolean canMove;
   float radius;
-  
+  ParticleMovementState state;
+  PVector trickForce;
   public Particle(PVector pos, float mass, float radius) {
     this.pos = pos.copy();
     this.prevPos = pos.copy();
     this.forceAccumulator = new PVector(0, 0);
     this.mass = mass;
     invMass = 1.0/mass;
-    
     this.radius = radius;
     canMove = true;
+    this.state = ParticleMovementState.DEFAULT;
   }
   
   abstract void draw();
@@ -52,4 +53,8 @@ abstract class Particle implements VisibleObject, Circle {
   void addForce(PVector force) {
     forceAccumulator.add(force);
   }
+}
+
+enum ParticleMovementState {
+  DEFAULT, RAILRIGHT, RAILLEFT;
 }
