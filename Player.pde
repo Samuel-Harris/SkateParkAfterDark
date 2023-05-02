@@ -1,5 +1,5 @@
 import java.util.LinkedList;
-import java.util.stream.Collectors; 
+import java.util.stream.Collectors;
 
 
 class Player extends Particle {
@@ -14,8 +14,9 @@ class Player extends Particle {
   int hitInvulnerabilityFrames;
   int hitInvulnerabilityFramesLeft;
   float minAngle,maxAngle;
+  PlayerSpeedEnum speedEnum;
   
-  public Player(PVector startPos) {
+  public Player(PVector startPos, SoundFile skatingSound) {
     super(startPos, 1000.0, 50);
     canMove = true;
     maxLives = 3;
@@ -73,8 +74,35 @@ class Player extends Particle {
     fill(244);
     stroke(244);
     arc(pos.x, pos.y, 200, 200, minAngle, maxAngle);
-    ellipseMode(CENTER);
+    ellipseMode(CENTER); 
+  }
+  
+  void integrate() {
+    float speed = getVelocity().mag();
+    if (speed < 5) {
+      if (speedEnum != PlayerSpeedEnum.STATIONARY) {
+        speedEnum = PlayerSpeedEnum.STATIONARY;
+        skatingSound.pause();
+      }
+    } else {
+      if (speed < 30) {
+        if (speedEnum != PlayerSpeedEnum.SLOW) {
+          speedEnum = PlayerSpeedEnum.SLOW;
+          skatingSound.rate(1.2);
+          skatingSound.amp(0.1);
+        }
+      } else if (speedEnum != PlayerSpeedEnum.FAST) {
+          speedEnum = PlayerSpeedEnum.FAST;
+          skatingSound.rate(1.5);
+          skatingSound.amp(0.2);
+      }
+      
+      if (!skatingSound.isPlaying()) {
+        skatingSound.loop();
+      }
+    }
     
+    super.integrate();
   }
   
   float getHitInvulnerabilityFrames() {

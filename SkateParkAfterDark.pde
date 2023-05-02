@@ -33,6 +33,8 @@ PShape octagon;
 
 HUD hud;
 
+SoundFile skatingSound;
+
 void setup() {
   imageMode(CENTER);
 
@@ -40,12 +42,14 @@ void setup() {
 
   mapWidth = 5 * displayWidth;
   mapHeight = 5 * displayHeight;
-  
-  reset();
 
   SoundFile backgroundMusic = new SoundFile(this, "music/background_music.wav");
   backgroundMusic.amp(1.0);
   backgroundMusic.loop();
+  
+  skatingSound = new SoundFile(this, "sound_effects/skating_sound.wav");
+  
+  reset();
 }
 
 void reset() {
@@ -56,7 +60,7 @@ void reset() {
   mouseOverRetryButton = false;
   mouseOverExitButton = false;
   
-  player = new Player(new PVector(mapWidth/2, mapHeight/2));
+  player = new Player(new PVector(mapWidth/2, mapHeight/2), skatingSound);
 
   roundGenerator();
 }
