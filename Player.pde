@@ -15,6 +15,7 @@ class Player extends Particle {
   int hitInvulnerabilityFramesLeft;
   float minAngle,maxAngle;
   PlayerSpeedEnum speedEnum;
+  SoundFile skatingSound;
   
   public Player(PVector startPos, SoundFile skatingSound) {
     super(startPos, 1000.0, 50);
@@ -27,6 +28,7 @@ class Player extends Particle {
     bulletCount = 500;
     hitInvulnerabilityFrames = 30;
     hitInvulnerabilityFramesLeft = 0;
+    this.skatingSound = skatingSound;
   }
   
   void draw() {

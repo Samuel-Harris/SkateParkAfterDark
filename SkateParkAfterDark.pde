@@ -33,6 +33,7 @@ PShape octagon;
 
 HUD hud;
 
+SoundFile backgroundMusic;
 SoundFile skatingSound;
 
 void setup() {
@@ -43,9 +44,9 @@ void setup() {
   mapWidth = 5 * displayWidth;
   mapHeight = 5 * displayHeight;
 
-  SoundFile backgroundMusic = new SoundFile(this, "music/background_music.wav");
-  backgroundMusic.amp(1.0);
-  backgroundMusic.loop();
+  backgroundMusic = new SoundFile(this, "music/background_music.wav");
+  backgroundMusic.amp(0.8);
+  backgroundMusic.jump(int(random(backgroundMusic.duration())));
   
   skatingSound = new SoundFile(this, "sound_effects/skating_sound.wav");
   
@@ -237,6 +238,10 @@ void drawGameOverScreen() {
 
 
 void draw() {
+  if (!backgroundMusic.isPlaying()) {
+    backgroundMusic.loop();
+  }
+  
   // this can be optimised by just removing the bullet and enemy from the collidableObjectList & visibleObjectList direclty from the collideWith class, however not the best coding practice
   List toRemove = collidableObjectList.stream().filter(e -> e instanceof Bullet).map(e -> (Bullet)e).filter(e -> e.life <= 0).collect(Collectors.toList());
   collidableObjectList.removeAll(toRemove);
