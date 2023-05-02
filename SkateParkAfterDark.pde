@@ -6,7 +6,8 @@ boolean startScreen = true,
         mouseOverStartButton = false,
         mouseOverContinueButton = false,
         mouseOverRetryButton = false,
-        mouseOverExitButton = false;
+        mouseOverExitButton = false, 
+        controlOpen = true;
 
 
 int round = 0,
@@ -27,8 +28,8 @@ CollisionDetector collisionDetector;
 
 List<Enemy> enemies;
 int enemyCount;
-
-PShape octagon; //<>//
+ //<>//
+PShape octagon;
 
 HUD hud;
 
@@ -103,9 +104,8 @@ void roundGenerator() {
   }
   octagon.endShape(CLOSE);
 
-  Rail rs = new Rail(new PVector(mapWidth/2, mapHeight/3), new PVector(mapWidth/4, mapHeight/3));
-  collidableObjectList.add(rs.top);
-  collidableObjectList.add(rs.bottom);
+  Rail rs = new Rail(new PVector(mapWidth/2, mapHeight/3), new PVector(mapWidth/3, mapHeight/2));
+  collidableObjectList.add(rs);
   visibleObjectList.add(rs);
 }
 
@@ -240,7 +240,6 @@ void drawGameOverScreen() {
   text(str, cameraX + width/2, cameraY + width/2 + 90);
 }
 
-
 void draw() {
   // this can be optimised by just removing the bullet and enemy from the collidableObjectList & visibleObjectList direclty from the collideWith class, however not the best coding practice
   List toRemove = collidableObjectList.stream().filter(e -> e instanceof Bullet).map(e -> (Bullet)e).filter(e -> e.life <= 0).collect(Collectors.toList());
@@ -264,23 +263,42 @@ void draw() {
       }
     }
   }
-  
+  List<Particle> contactListWithParticleCollidingWithRails1 = contactList.stream()
+                                                            .filter(e -> e.collidableA instanceof Rail && e.collidableB instanceof Particle)
+                                                            .map(e -> (Particle)e.collidableB)
+                                                            .collect(Collectors.toList());
+  List<Particle> contactListWithParticleCollidingWithRails2 = contactList.stream()
+                                                            .filter(e -> e.collidableB instanceof Rail && e.collidableA instanceof Particle)
+                                                            .map(e -> (Particle)e.collidableA)
+                                                            .collect(Collectors.toList());
+  contactListWithParticleCollidingWithRails1.addAll(contactListWithParticleCollidingWithRails2);
+  List<Particle> esfce = collidableObjectList.stream()
+                          .filter(e -> e instanceof Particle)
+                          .map(e -> (Particle)e)
+                          .filter(e -> e.state != ParticleMovementState.DEFAULT)
+                          .filter(e -> !contactListWithParticleCollidingWithRails1.contains(e))
+                          .collect(Collectors.toList());
+  getOffRail(esfce);
   for (Contact contact: contactList) {
     if (contact.collidableA instanceof Bullet && contact.collidableB instanceof Bullet) continue; 
     if (contact.collidableA instanceof Bullet && contact.collidableB instanceof Player) continue; 
     if (contact.collidableA instanceof Player && contact.collidableB instanceof Bullet) continue; 
-    //if (contact.collidableA instanceof Bullet && contact.collidableB instanceof Rail) continue; 
 
-    if (contact.collidableA instanceof PartRail ) {
-      PartRail rai = (PartRail) contact.collidableA;
-      contact.collidableB.addForce(rai.getNormalisedVector().copy().setMag(4000));
-      print("hello");
+    if (contact.collidableA instanceof Rail && contact.collidableB instanceof Particle) {
+      Rail rai = (Rail) contact.collidableA;
+      Particle p = (Particle) contact.collidableB;
+      if (p.state == ParticleMovementState.DEFAULT) {
+         getOnTheRail(p,rai);
+      }
+      contact.collidableB.addForce(p.trickForce);
       continue; 
-    } else if (contact.collidableB instanceof PartRail) {
-      PartRail rai = (PartRail) contact.collidableB;
-      contact.collidableA.addForce(rai.getNormalisedVector().copy().setMag(4000));
-      print(rai.getNormalisedVector());
-
+    } else if (contact.collidableB instanceof Rail && contact.collidableA instanceof Particle) {
+      Rail rai = (Rail) contact.collidableB;
+      Particle p = (Particle) contact.collidableA;
+      if (p.state == ParticleMovementState.DEFAULT) {
+        getOnTheRail(p,rai);
+      }
+      contact.collidableA.addForce(p.trickForce);
       continue; 
     }
     contact.resolve();
@@ -324,24 +342,61 @@ void draw() {
   hud.draw();
 }
 
+void getOnTheRail(Particle p, Rail rai) {
+  if (p instanceof Player) stopPlayerFromMoving();
+  p.forceAccumulator = new PVector(0,0);
+  PVector dir = p.getVelocity();
+  float d = PVector.dot(dir, rai.getNormalisedVector());
+  p.state = d>0 ? ParticleMovementState.RAILLEFT: ParticleMovementState.RAILRIGHT;
+  p.trickForce = rai.getNormalisedVector().copy().setMag(d*-500);
+  GetClosestPoint(rai,p);
+  p.prevPos = p.pos.copy();
+}
+
+void GetClosestPoint(Rail r, Particle p){
+  PVector a_to_p = new PVector(p.pos.x - r.startPoint.x, p.pos.y - r.startPoint.y);
+  PVector a_to_b = new PVector(r.endPoint.x - r.startPoint.x, r.endPoint.y - r.startPoint.y);
+  float atb2 = a_to_b.x*a_to_b.x + a_to_b.y*a_to_b.y;
+  float atp_dot_atb = a_to_p.x*a_to_b.x + a_to_p.y*a_to_b.y;
+  float t = atp_dot_atb / atb2;
+  p.pos = new PVector(r.startPoint.x + a_to_b.x*t, r.startPoint.y + a_to_b.y*t );
+}
+
+void getOffRail(List<Particle> ps) {
+  for (Particle p : ps){
+    if (p instanceof Player) controlOpen = true;
+    p.state = ParticleMovementState.DEFAULT;
+    p.trickForce = null;
+  }
+}
+void stopPlayerFromMoving() {
+  controlOpen = false;
+  player.stopMovingUp();
+  player.stopMovingLeft();
+  player.stopMovingDown();
+  player.stopMovingRight();
+}
+
 void keyPressed() {
-  switch (key) {
-    case 'w':
-    case 'W':
-      player.startMovingUp();
-      break;
-    case 'a':
-    case 'A':
-      player.startMovingLeft();
-      break;
-    case 's':
-    case 'S':
-      player.startMovingDown();
-      break;
-    case 'd':
-    case 'D':
-      player.startMovingRight();
-      break;
+  if (controlOpen) {
+    switch (key) {
+      case 'w':
+      case 'W':
+        player.startMovingUp();
+        break;
+      case 'a':
+      case 'A':
+        player.startMovingLeft();
+        break;
+      case 's':
+      case 'S':
+        player.startMovingDown();
+        break;
+      case 'd':
+      case 'D':
+        player.startMovingRight();
+        break;
+    }
   }
 }
 
