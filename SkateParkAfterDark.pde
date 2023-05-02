@@ -28,7 +28,7 @@ List<Collidable> collidableObjectList;
 CollisionDetector collisionDetector;
 
 List<Enemy> enemies;
-int enemyCount;
+int enemyCount; //<>//
  //<>//
 PShape octagon;
 
@@ -352,7 +352,17 @@ void getOnTheRail(Particle p, Rail rai) {
   PVector dir = p.getVelocity();
   float d = PVector.dot(dir, rai.getNormalisedVector());
   p.state = d>0 ? ParticleMovementState.RAILLEFT: ParticleMovementState.RAILRIGHT;
-  p.trickForce = rai.getNormalisedVector().copy().setMag(d*-500);
+  d *= -500; 
+  println(d);
+  if (abs(d) < 7000) {
+    if (d<0) d = -7000;
+    else d = 7000;
+  }
+  else if (abs(d) > 10000) {
+    if (d<0) d = -10000;
+    else d = 10000;
+  }
+  p.trickForce = rai.getNormalisedVector().copy().setMag(d);
   GetClosestPoint(rai,p);
   p.prevPos = p.pos.copy();
 }
