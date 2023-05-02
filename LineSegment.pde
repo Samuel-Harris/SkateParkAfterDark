@@ -5,7 +5,6 @@ class LineSegment implements Collidable {
   PVector normalisedVector;
   PVector normalVector;
   float halfLength;
-  
   public LineSegment(PVector startPoint, PVector endPoint) {
     this.startPoint = startPoint;
     this.endPoint = endPoint;

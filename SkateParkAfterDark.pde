@@ -75,13 +75,13 @@ void roundGenerator() {
   
   visibleObjectList = new ArrayList();
   visibleObjectList.add(player);
-  visibleObjectList.addAll(enemies);
+  //visibleObjectList.addAll(enemies);
   
   hud = new HUD(player);
 
   collidableObjectList = new ArrayList();
   collidableObjectList.add(player);
-  collidableObjectList.addAll(enemies);
+  //collidableObjectList.addAll(enemies);
   
   collisionDetector = new CollisionDetector();
 
@@ -103,6 +103,10 @@ void roundGenerator() {
   }
   octagon.endShape(CLOSE);
 
+  Rail rs = new Rail(new PVector(mapWidth/2, mapHeight/3), new PVector(mapWidth/4, mapHeight/3));
+  collidableObjectList.add(rs.top);
+  collidableObjectList.add(rs.bottom);
+  visibleObjectList.add(rs);
 }
 
 void transitionScreen() {
@@ -265,6 +269,20 @@ void draw() {
     if (contact.collidableA instanceof Bullet && contact.collidableB instanceof Bullet) continue; 
     if (contact.collidableA instanceof Bullet && contact.collidableB instanceof Player) continue; 
     if (contact.collidableA instanceof Player && contact.collidableB instanceof Bullet) continue; 
+    //if (contact.collidableA instanceof Bullet && contact.collidableB instanceof Rail) continue; 
+
+    if (contact.collidableA instanceof PartRail ) {
+      PartRail rai = (PartRail) contact.collidableA;
+      contact.collidableB.addForce(rai.getNormalisedVector().copy().setMag(4000));
+      print("hello");
+      continue; 
+    } else if (contact.collidableB instanceof PartRail) {
+      PartRail rai = (PartRail) contact.collidableB;
+      contact.collidableA.addForce(rai.getNormalisedVector().copy().setMag(4000));
+      print(rai.getNormalisedVector());
+
+      continue; 
+    }
     contact.resolve();
   }
   
@@ -289,8 +307,8 @@ void draw() {
   }
 
   if (player.getLives()<=0) {
-    drawGameOverScreen();
-    return;
+    //drawGameOverScreen();
+    //return;
   }
 
   for (VisibleObject visibleObject: visibleObjectList) {
