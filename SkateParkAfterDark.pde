@@ -1,23 +1,24 @@
 import java.util.List;
 import java.util.Optional;
+import processing.sound.SoundFile;
 
 boolean startScreen = true,
-        pauseScreen = false,
-        mouseOverStartButton = false,
-        mouseOverContinueButton = false,
-        mouseOverRetryButton = false,
-        mouseOverExitButton = false, 
+  pauseScreen = false,
+  mouseOverStartButton = false,
+  mouseOverContinueButton = false,
+  mouseOverRetryButton = false,
+  mouseOverExitButton = false, 
         controlOpen = true;
 
 
 int round = 0,
-    transitionCounter = 0, incre, fade;
+  transitionCounter = 0, incre, fade;
 
 float mapWidth,
-      mapHeight,
-      cameraX,
-      cameraY,
-      octagonRadius = 1500;
+  mapHeight,
+  cameraX,
+  cameraY,
+  octagonRadius = 1500;
 
 Player player;
 
@@ -37,20 +38,28 @@ void setup() {
   imageMode(CENTER);
 
   fullScreen();
+
+  mapWidth = 5 * displayWidth;
+  mapHeight = 5 * displayHeight;
+  
+  reset();
+
+  SoundFile backgroundMusic = new SoundFile(this, "music/background_music.wav");
+  backgroundMusic.amp(1.0);
+  backgroundMusic.loop();
+}
+
+void reset() {
   startScreen = true;
   pauseScreen = false;
   mouseOverStartButton = false;
   mouseOverContinueButton = false;
   mouseOverRetryButton = false;
   mouseOverExitButton = false;
-
-  mapWidth = 5 * displayWidth;
-  mapHeight = 5 * displayHeight;
-
+  
   player = new Player(new PVector(mapWidth/2, mapHeight/2));
 
   roundGenerator();
-
 }
 
 void roundGenerator() {
@@ -62,7 +71,7 @@ void roundGenerator() {
 
   cameraX = player.pos.x - displayWidth/2;
   cameraY = player.pos.y - displayHeight/2;
-  
+
   enemies = new ArrayList();
   for (int i = 0; i < enemyCount; i++) {
     float enX = random(mapWidth);
@@ -71,26 +80,26 @@ void roundGenerator() {
       enX = random(mapWidth);
       enY = random(mapHeight);
     }
-    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000,3000)), int(random(6,13)), 500));
+    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500));
   }
-  
+
   visibleObjectList = new ArrayList();
   visibleObjectList.add(player);
-  //visibleObjectList.addAll(enemies);
-  
+  visibleObjectList.addAll(enemies);
+
   hud = new HUD(player);
 
   collidableObjectList = new ArrayList();
   collidableObjectList.add(player);
-  //collidableObjectList.addAll(enemies);
-  
+  collidableObjectList.addAll(enemies);
+
   collisionDetector = new CollisionDetector();
 
   PVector octagonCentre = new PVector(mapWidth/2, mapHeight/2);
   float EIGHTH_PI = PI / 8;
   octagon = createShape();
   octagon.beginShape();
-  octagon.fill(0,150,60);
+  octagon.fill(0, 150, 60);
   float prevSx = octagonCentre.x + cos(-EIGHTH_PI) * octagonRadius;
   float prevSy = octagonCentre.y + sin(-EIGHTH_PI) * octagonRadius;
   for (int i=0; i<8; i++) {
@@ -135,7 +144,7 @@ void transitionScreen() {
 void drawStartScreen() {
   textAlign(CENTER, CENTER);
   textSize(32);
-  fill(159,20,0);
+  fill(159, 20, 0);
   text("Skate Park\nAfter Dark", cameraX + width/2, cameraY + height/2);
 
   rectMode(CORNER);
@@ -144,12 +153,11 @@ void drawStartScreen() {
   float y = cameraY + width/2 ;
   float w = 100;
   float h = 50;
-  if (overRect(x,y,w,h)) {
-    fill(12,160,20);
+  if (overRect(x, y, w, h)) {
+    fill(12, 160, 20);
     mouseOverStartButton = true;
-  }
-  else {
-    fill(230,230,230);
+  } else {
+    fill(230, 230, 230);
     mouseOverStartButton = false;
   }
   rect(x, y, w, h);
@@ -161,7 +169,7 @@ void drawStartScreen() {
 void drawPauseScreen() {
   textAlign(CENTER, CENTER);
   textSize(32);
-  fill(159,20,0);
+  fill(159, 20, 0);
   text("Skate Park\nAfter Dark", cameraX + width/2, cameraY + height/4);
   text("Game Paused", cameraX + width/2, cameraY + height/2);
 
@@ -170,12 +178,11 @@ void drawPauseScreen() {
   float y = cameraY + width/2 ;
   float w = 130;
   float h = 50;
-  if (overRect(x,y,w,h)) {
-    fill(12,160,20);
+  if (overRect(x, y, w, h)) {
+    fill(12, 160, 20);
     mouseOverContinueButton = true;
-  }
-  else {
-    fill(230,230,230);
+  } else {
+    fill(230, 230, 230);
     mouseOverContinueButton = false;
   }
   rect(x, y, w, h);
@@ -185,12 +192,11 @@ void drawPauseScreen() {
   text(str, cameraX + width/2, cameraY + width/2 + 20);
 
   y = cameraY + width/2 + 70;
-  if (overRect(x,y,w,h)) {
-    fill(12,160,20);
+  if (overRect(x, y, w, h)) {
+    fill(12, 160, 20);
     mouseOverExitButton = true;
-  }
-  else {
-    fill(230,230,230);
+  } else {
+    fill(230, 230, 230);
     mouseOverExitButton = false;
   }
   rect(x, y, w, h);
@@ -202,7 +208,7 @@ void drawPauseScreen() {
 void drawGameOverScreen() {
   textAlign(CENTER, CENTER);
   textSize(32);
-  fill(159,20,0);
+  fill(159, 20, 0);
   text("Skate Park\nAfter Dark", cameraX + width/2, cameraY + height/4);
   text("Game Over", cameraX + width/2, cameraY + height/2);
 
@@ -211,12 +217,11 @@ void drawGameOverScreen() {
   float y = cameraY + width/2 ;
   float w = 130;
   float h = 50;
-  if (overRect(x,y,w,h)) {
-    fill(12,160,20);
+  if (overRect(x, y, w, h)) {
+    fill(12, 160, 20);
     mouseOverRetryButton = true;
-  }
-  else {
-    fill(230,230,230);
+  } else {
+    fill(230, 230, 230);
     mouseOverRetryButton = false;
   }
   rect(x, y, w, h);
@@ -226,12 +231,11 @@ void drawGameOverScreen() {
   text(str, cameraX + width/2, cameraY + width/2 + 20);
 
   y = cameraY + width/2 + 70;
-  if (overRect(x,y,w,h)) {
-    fill(12,160,20);
+  if (overRect(x, y, w, h)) {
+    fill(12, 160, 20);
     mouseOverExitButton = true;
-  }
-  else {
-    fill(230,230,230);
+  } else {
+    fill(230, 230, 230);
     mouseOverExitButton = false;
   }
   rect(x, y, w, h);
@@ -245,18 +249,18 @@ void draw() {
   List toRemove = collidableObjectList.stream().filter(e -> e instanceof Bullet).map(e -> (Bullet)e).filter(e -> e.life <= 0).collect(Collectors.toList());
   collidableObjectList.removeAll(toRemove);
   visibleObjectList.removeAll(toRemove);
-  
+
   toRemove = enemies.stream().filter(e -> e.health <= 0).collect(Collectors.toList());
   enemies.removeAll(toRemove);
   collidableObjectList.removeAll(toRemove);
   visibleObjectList.removeAll(toRemove);
-  
+
   List<Contact> contactList = new ArrayList();
   for (int i=0; i<collidableObjectList.size(); i++) {
     for (int j=i+1; j<collidableObjectList.size(); j++) {
       Collidable collidableA = collidableObjectList.get(i);
       Collidable collidableB = collidableObjectList.get(j);
-      
+
       Optional<Contact> contactOptional = collisionDetector.detectCollision(collidableA, collidableB);
       if (contactOptional.isPresent()) {
         contactList.add(contactOptional.get());
@@ -303,7 +307,7 @@ void draw() {
     }
     contact.resolve();
   }
-  
+
   cameraX = player.pos.x - displayWidth/2;
   cameraY = player.pos.y - displayHeight/2;
 
@@ -311,7 +315,7 @@ void draw() {
 
   //image(bgImage, 0, 0, mapWidth, mapHeight);
   fill(230);
-  rect(0,0, mapWidth, mapHeight);
+  rect(0, 0, mapWidth, mapHeight);
   shape(octagon, 0, 0);
 
   if (startScreen) {
@@ -329,15 +333,15 @@ void draw() {
     //return;
   }
 
-  for (VisibleObject visibleObject: visibleObjectList) {
+  for (VisibleObject visibleObject : visibleObjectList) {
     visibleObject.draw();
   }
-  
+
   translate(cameraX, cameraY);
 
   if (enemies.isEmpty()) {
-     transitionScreen();
-   }
+    transitionScreen();
+  }
 
   hud.draw();
 }
@@ -405,26 +409,25 @@ void keyReleased() {
     if (keyCode == TAB) pauseScreen = true;
   }
   switch (key) {
-    case 'w':
-    case 'W':
-      player.stopMovingUp();
-      break;
-    case 'a':
-    case 'A':
-      player.stopMovingLeft();
-      break;
-    case 's':
-    case 'S':
-      player.stopMovingDown();
-      break;
-    case 'd':
-    case 'D':
-      player.stopMovingRight();
-      break;
-    case TAB:
-      pauseScreen = true;
-      break;
-
+  case 'w':
+  case 'W':
+    player.stopMovingUp();
+    break;
+  case 'a':
+  case 'A':
+    player.stopMovingLeft();
+    break;
+  case 's':
+  case 'S':
+    player.stopMovingDown();
+    break;
+  case 'd':
+  case 'D':
+    player.stopMovingRight();
+    break;
+  case TAB:
+    pauseScreen = true;
+    break;
   }
 }
 
@@ -434,13 +437,12 @@ void mouseReleased() {
   } else if (mouseOverContinueButton) {
     pauseScreen = mouseOverContinueButton = false;
   } else if (mouseOverRetryButton) {
-    setup();
+    reset();
   } else if (mouseOverExitButton) {
     exit();
   } else {
     fireBullets();
   }
-
 }
 
 void fireBullets() {
@@ -451,7 +453,7 @@ void fireBullets() {
   for (int i = 0; i < 5; i++) {
     float angle = random(player.minAngle, player.maxAngle);
     PVector dir = PVector.fromAngle(angle).setMag(50);
-    PVector pos = PVector.add(player.pos,dir);
+    PVector pos = PVector.add(player.pos, dir);
     Bullet b = new Bullet(pos, dir, 10, 100);
     visibleObjectList.add(b);
     collidableObjectList.add(b);
