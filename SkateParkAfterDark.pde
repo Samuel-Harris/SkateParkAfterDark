@@ -35,6 +35,7 @@ HUD hud;
 
 SoundFile backgroundMusic;
 SoundFile skatingSound;
+SoundFile shotgunSound;
 
 void setup() {
   imageMode(CENTER);
@@ -49,6 +50,9 @@ void setup() {
   backgroundMusic.jump(int(random(backgroundMusic.duration())));
   
   skatingSound = new SoundFile(this, "sound_effects/skating_sound.wav");
+  
+  shotgunSound = new SoundFile(this, "sound_effects/shotgun_fire.wav");
+  shotgunSound.amp(0.3);
   
   reset();
 }
@@ -370,7 +374,6 @@ void getOnTheRail(Particle p, Rail rai) {
   d *= -500; 
   float maxSpeed = 3000;
   float minSpeed = 1500;
-  println(d);
   if (abs(d) < minSpeed) {
     if (d<0) d = -minSpeed;
     else d = minSpeed;
@@ -476,6 +479,8 @@ void mouseReleased() {
 }
 
 void fireBullets() {
+  shotgunSound.play();
+  
   if (player.bulletCount < 5) {
     return;
   }
