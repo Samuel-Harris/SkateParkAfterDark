@@ -4,3 +4,4 @@
 *.mp3
 data/music/*.wav
 data/sound_effects/skating_sound_*.wav
+data/sound_effects/*_original.wav

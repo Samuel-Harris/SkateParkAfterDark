@@ -36,6 +36,7 @@ HUD hud;
 SoundFile backgroundMusic;
 SoundFile skatingSound;
 SoundFile shotgunSound;
+SoundFile grindingSound;
 
 void setup() {
   imageMode(CENTER);
@@ -52,7 +53,9 @@ void setup() {
   skatingSound = new SoundFile(this, "sound_effects/skating_sound.wav");
   
   shotgunSound = new SoundFile(this, "sound_effects/shotgun_fire.wav");
-  shotgunSound.amp(0.3);
+  shotgunSound.amp(0.2);
+  
+  grindingSound = new SoundFile(this, "sound_effects/grind.wav");
   
   reset();
 }
@@ -366,7 +369,10 @@ void draw() {
 }
 
 void getOnTheRail(Particle p, Rail rai) {
-  if (p instanceof Player) stopPlayerFromMoving();
+  if (p instanceof Player) {
+    grindingSound.loop();
+    stopPlayerFromMoving();
+  }
   p.forceAccumulator = new PVector(0,0);
   PVector dir = p.getVelocity();
   float d = PVector.dot(dir, rai.getNormalisedVector());
@@ -397,8 +403,10 @@ void GetClosestPoint(Rail r, Particle p){
 }
 
 void getOffRail(List<Particle> ps) {
+  
   for (Particle p : ps){
     if (p instanceof Player) {
+      grindingSound.pause();
       controlOpen = true;
       bulletRefillCount = 0;
     }
