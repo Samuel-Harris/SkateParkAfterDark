@@ -11,8 +11,7 @@ boolean startScreen = true,
   controlOpen = true;
 
 
-int round = 0,
-  transitionCounter = 0, incre, fade, bulletRefillCount = 0;
+int round, transitionCounter, incre, fade, bulletRefillCount;
 
 float mapWidth,
   mapHeight,
@@ -28,8 +27,8 @@ List<Collidable> collidableObjectList;
 CollisionDetector collisionDetector;
 
 List<Enemy> enemies;
-int enemyCount;  //<>//
-PShape octagon;
+int enemyCount; //<>//
+PShape octagon; //<>//
 
 HUD hud;
 
@@ -44,7 +43,7 @@ void setup() {
   imageMode(CENTER);
 
   fullScreen();
-
+  
   mapWidth = 5 * displayWidth;
   mapHeight = 5 * displayHeight;
 
@@ -67,6 +66,10 @@ void setup() {
 }
 
 void reset() {
+  round = 0;
+  transitionCounter = 0; 
+  bulletRefillCount = 0;
+  
   startScreen = true;
   pauseScreen = false;
   mouseOverStartButton = false;
@@ -101,6 +104,7 @@ void roundGenerator() {
     }
     enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500));
   }
+  
 
   visibleObjectList = new ArrayList();
   visibleObjectList.add(player);
@@ -114,6 +118,11 @@ void roundGenerator() {
 
   collisionDetector = new CollisionDetector();
 
+  float minX = 100000;
+  float maxX = -100000;
+  float minY = 100000;
+  float maxY = -100000;
+  
   PVector octagonCentre = new PVector(mapWidth/2, mapHeight/2);
   float EIGHTH_PI = PI / 8;
   octagon = createShape();
@@ -129,12 +138,63 @@ void roundGenerator() {
     collidableObjectList.add(new LineSegment(new PVector(prevSx, prevSy), new PVector(sx, sy)));
     prevSx = sx;
     prevSy = sy;
-  }
+    
+    minX = min(minX, sx);  
+    maxX = max(maxX, sx);  
+    minY = min(minY, sy);  
+    maxY = max(maxY, sy);  
+  } //<>//
   octagon.endShape(CLOSE);
 
-  Rail rs = new Rail(new PVector(mapWidth/2, mapHeight/3), new PVector(mapWidth/3, mapHeight/2));
-  collidableObjectList.add(rs);
-  visibleObjectList.add(rs);
+  Rail[] rails = new Rail[3]; 
+  float hexRad = (maxX - minX) /2;
+  int minLengthOfRail = 600;
+  int maxLengthOfRail = 700;
+  for (int i = 2; i >= 0; i--) {
+    PVector st;
+    PVector en;
+    float radiusAchived;
+    boolean doesIntersect = false;
+    do {
+      do {
+        st = new PVector(random( minX, maxX),random( minY, maxY));
+      } while (PVector.dist(st, octagonCentre) > hexRad);    
+      
+      do {
+        float rad = random(minLengthOfRail,maxLengthOfRail);
+        float Xmin = st.x - rad;
+        float Xmax = st.x + rad;
+        float Ymin = st.y - rad;
+        float Ymax = st.y + rad;
+        en = new PVector(random( Xmin, Xmax),random( Ymin, Ymax));
+        radiusAchived = PVector.dist(st,en);
+      }  while (PVector.dist(en, octagonCentre) > hexRad && radiusAchived > minLengthOfRail && radiusAchived < maxLengthOfRail);
+      
+      rails[i] = new Rail(st,en);
+      for (int j = i+1; j < 3; j++) {
+        doesIntersect = doesLineIntersect(rails[i],rails[j]);
+        if (doesIntersect) break;
+      }
+    
+    } while (doesIntersect);
+    collidableObjectList.add(rails[i]);
+    visibleObjectList.add(rails[i]);
+  }
+}
+
+boolean doesLineIntersect (Rail r1, Rail r2) {
+  if (r1.m == r2.m) return false;
+  float x = (r2.c - r1.c) / (r1.m - r2.m);
+  if (x < r1.Xmin || x > r1.Xmax || x < r2.Xmin || x > r2.Xmax) {
+    return false;
+  }
+  
+  float y = r1.m * x + r1.c;
+  if (y < r1.Ymin || y > r1.Ymax || y < r2.Ymin || y > r2.Ymax) {
+    return false;
+  }
+  
+  return true;
 }
 
 void transitionScreen() {
@@ -335,8 +395,7 @@ void draw() {
   cameraY = player.pos.y - displayHeight/2;
 
   translate(-cameraX, -cameraY);
-
-  //image(bgImage, 0, 0, mapWidth, mapHeight);
+  
   fill(230);
   rect(0, 0, mapWidth, mapHeight);
   shape(octagon, 0, 0);
@@ -424,10 +483,10 @@ void getOffRail(List<Particle> ps) {
 }
 void stopPlayerFromMoving() {
   controlOpen = false;
-  player.stopMovingUp();
-  player.stopMovingLeft();
-  player.stopMovingDown();
-  player.stopMovingRight();
+  //player.stopMovingUp();
+  //player.stopMovingLeft();
+  //player.stopMovingDown();
+  //player.stopMovingRight();
 }
 
 void keyPressed() {

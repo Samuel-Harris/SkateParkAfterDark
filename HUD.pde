@@ -41,5 +41,10 @@ class HUD implements VisibleObject {
     for (int i=livesLeft+1; i<player.getMaxLives(); i++) {
       image(heartSprites[numHeartSprites-1], heartXPositions[i], height - heartWidth);
     }
-  }
+    
+    fill(255);
+    textSize(104); 
+    textAlign(CENTER,CENTER);
+    text(player.bulletCount, width - 100, height - heartWidth); 
+  }  
 }
