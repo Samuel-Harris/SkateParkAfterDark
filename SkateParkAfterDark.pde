@@ -11,8 +11,7 @@ boolean startScreen = true,
   controlOpen = true;
 
 
-int round = 0,
-  transitionCounter = 0, incre, fade, bulletRefillCount = 0;
+int round, transitionCounter, incre, fade, bulletRefillCount;
 
 float mapWidth,
   mapHeight,
@@ -29,7 +28,7 @@ CollisionDetector collisionDetector;
 
 List<Enemy> enemies;
 int enemyCount; //<>//
-PShape octagon;
+PShape octagon; //<>//
 
 HUD hud;
 
@@ -42,7 +41,7 @@ void setup() {
   imageMode(CENTER);
 
   fullScreen();
-
+  
   mapWidth = 5 * displayWidth;
   mapHeight = 5 * displayHeight;
 
@@ -61,6 +60,10 @@ void setup() {
 }
 
 void reset() {
+  round = 0;
+  transitionCounter = 0; 
+  bulletRefillCount = 0;
+  
   startScreen = true;
   pauseScreen = false;
   mouseOverStartButton = false;
@@ -132,10 +135,11 @@ void roundGenerator() {
     maxX = max(maxX, sx);  
     minY = min(minY, sy);  
     maxY = max(maxY, sy);  
-  }
+  } //<>//
   octagon.endShape(CLOSE);
 
-  Rail[] rails = new Rail[3]; //<>//
+  Rail[] rails = new Rail[3]; 
+  float hexRad = (maxX - minX) /2;
   int minLengthOfRail = 600;
   int maxLengthOfRail = 700;
   for (int i = 2; i >= 0; i--) {
@@ -146,7 +150,7 @@ void roundGenerator() {
     do {
       do {
         st = new PVector(random( minX, maxX),random( minY, maxY));
-      } while (PVector.dist(st, octagonCentre) > octagonRadius - 100);    
+      } while (PVector.dist(st, octagonCentre) > hexRad);    
       
       do {
         float rad = random(minLengthOfRail,maxLengthOfRail);
@@ -156,7 +160,7 @@ void roundGenerator() {
         float Ymax = st.y + rad;
         en = new PVector(random( Xmin, Xmax),random( Ymin, Ymax));
         radiusAchived = PVector.dist(st,en);
-      }  while (PVector.dist(en, octagonCentre) > octagonRadius && radiusAchived > minLengthOfRail && radiusAchived < maxLengthOfRail);
+      }  while (PVector.dist(en, octagonCentre) > hexRad && radiusAchived > minLengthOfRail && radiusAchived < maxLengthOfRail);
       
       rails[i] = new Rail(st,en);
       for (int j = i+1; j < 3; j++) {
@@ -471,10 +475,10 @@ void getOffRail(List<Particle> ps) {
 }
 void stopPlayerFromMoving() {
   controlOpen = false;
-  player.stopMovingUp();
-  player.stopMovingLeft();
-  player.stopMovingDown();
-  player.stopMovingRight();
+  //player.stopMovingUp();
+  //player.stopMovingLeft();
+  //player.stopMovingDown();
+  //player.stopMovingRight();
 }
 
 void keyPressed() {

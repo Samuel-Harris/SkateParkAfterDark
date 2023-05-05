@@ -33,19 +33,19 @@ class Player extends Particle {
   
   void draw() {
     PVector moveDirection = new PVector(0, 0);
-    if (isMovingLeft) {
+    if (state == ParticleMovementState.DEFAULT && isMovingLeft) {
       moveDirection.add(new PVector(-1, 0));
     }
     
-    if (isMovingRight) {
+    if (state == ParticleMovementState.DEFAULT && isMovingRight) {
       moveDirection.add(new PVector(1, 0));
     }
     
-    if (isMovingUp) {
+    if (state == ParticleMovementState.DEFAULT && isMovingUp) {
       moveDirection.add(new PVector(0, -1));
     }
     
-    if (isMovingDown) {
+    if (state == ParticleMovementState.DEFAULT && isMovingDown) {
       moveDirection.add(new PVector(0, 1));
     }
     
