@@ -37,6 +37,8 @@ SoundFile backgroundMusic;
 SoundFile skatingSound;
 SoundFile shotgunSound;
 SoundFile grindingSound;
+final int numLevelChangeSounds = 4;
+SoundFile[] levelChangeSounds = new SoundFile[numLevelChangeSounds];
 
 void setup() {
   imageMode(CENTER);
@@ -57,6 +59,10 @@ void setup() {
   
   grindingSound = new SoundFile(this, "sound_effects/grind.wav");
   
+  for (int i=0; i<4; i++) {
+    levelChangeSounds[i] = new SoundFile(this, "roadman_sounds/level_change_" + i + ".wav");
+  }
+  
   reset();
 }
 
@@ -74,6 +80,8 @@ void reset() {
 }
 
 void roundGenerator() {
+  levelChangeSounds[int(random(numLevelChangeSounds))].play();
+  
   incre = -10;
   fade = 200;
   round++;
@@ -344,8 +352,8 @@ void draw() {
   }
 
   if (player.getLives()<=0) {
-    //drawGameOverScreen();
-    //return;
+    drawGameOverScreen();
+    return;
   }
 
   for (VisibleObject visibleObject : visibleObjectList) {
@@ -475,6 +483,7 @@ void keyReleased() {
 void mouseReleased() {
   if (mouseOverStartButton) {
     startScreen = mouseOverStartButton = false;
+    levelChangeSounds[int(random(numLevelChangeSounds))].play();
   } else if (mouseOverContinueButton) {
     pauseScreen = mouseOverContinueButton = false;
   } else if (mouseOverRetryButton) {
