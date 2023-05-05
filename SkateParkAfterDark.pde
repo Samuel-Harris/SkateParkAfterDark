@@ -1,13 +1,14 @@
 import java.util.List;
 import java.util.Optional;
 import processing.sound.SoundFile;
+import java.util.stream.IntStream;
 
 boolean startScreen = true,
   pauseScreen = false,
   mouseOverStartButton = false,
   mouseOverContinueButton = false,
   mouseOverRetryButton = false,
-  mouseOverExitButton = false, 
+  mouseOverExitButton = false,
   controlOpen = true;
 
 
@@ -27,64 +28,72 @@ List<Collidable> collidableObjectList;
 CollisionDetector collisionDetector;
 
 List<Enemy> enemies;
-int enemyCount; //<>//
-PShape octagon; //<>//
+int enemyCount;
+PShape octagon;
 
 HUD hud;
 
 SoundFile backgroundMusic;
 SoundFile skatingSound;
 SoundFile shotgunSound;
+SoundFile shotgunReloadSound;
 SoundFile grindingSound;
 final int numLevelChangeSounds = 4;
 SoundFile[] levelChangeSounds = new SoundFile[numLevelChangeSounds];
+
+int reloadFrames = 30; 
 
 void setup() {
   imageMode(CENTER);
 
   fullScreen();
-  
+
   mapWidth = 5 * displayWidth;
   mapHeight = 5 * displayHeight;
 
   backgroundMusic = new SoundFile(this, "music/background_music.wav");
   backgroundMusic.amp(0.8);
   backgroundMusic.jump(int(random(backgroundMusic.duration())));
-  
+
   skatingSound = new SoundFile(this, "sound_effects/skating_sound.wav");
-  
+
   shotgunSound = new SoundFile(this, "sound_effects/shotgun_fire.wav");
   shotgunSound.amp(0.2);
   
+  shotgunReloadSound = new SoundFile(this, "sound_effects/shotgun_reload.wav");
+  shotgunReloadSound.amp(0.2);
+
   grindingSound = new SoundFile(this, "sound_effects/grind.wav");
-  
+
   for (int i=0; i<4; i++) {
     levelChangeSounds[i] = new SoundFile(this, "roadman_sounds/level_change_" + i + ".wav");
   }
-  
+
   reset();
 }
 
 void reset() {
   round = 0;
-  transitionCounter = 0; 
+  transitionCounter = 0;
   bulletRefillCount = 0;
-  
+
   startScreen = true;
   pauseScreen = false;
   mouseOverStartButton = false;
   mouseOverContinueButton = false;
   mouseOverRetryButton = false;
   mouseOverExitButton = false;
-  
+
   player = new Player(new PVector(mapWidth/2, mapHeight/2), skatingSound);
 
   roundGenerator();
 }
 
 void roundGenerator() {
-  levelChangeSounds[int(random(numLevelChangeSounds))].play();
-  
+  if (!IntStream.range(0, numLevelChangeSounds).anyMatch(i -> levelChangeSounds[i].isPlaying())) {
+    levelChangeSounds[int(random(numLevelChangeSounds))].play();
+  }
+
   incre = -10;
   fade = 200;
   round++;
@@ -104,7 +113,7 @@ void roundGenerator() {
     }
     enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500));
   }
-  
+
 
   visibleObjectList = new ArrayList();
   visibleObjectList.add(player);
@@ -122,7 +131,7 @@ void roundGenerator() {
   float maxX = -100000;
   float minY = 100000;
   float maxY = -100000;
-  
+
   PVector octagonCentre = new PVector(mapWidth/2, mapHeight/2);
   float EIGHTH_PI = PI / 8;
   octagon = createShape();
@@ -138,15 +147,15 @@ void roundGenerator() {
     collidableObjectList.add(new LineSegment(new PVector(prevSx, prevSy), new PVector(sx, sy)));
     prevSx = sx;
     prevSy = sy;
-    
-    minX = min(minX, sx);  
-    maxX = max(maxX, sx);  
-    minY = min(minY, sy);  
-    maxY = max(maxY, sy);  
+
+    minX = min(minX, sx);
+    maxX = max(maxX, sx);
+    minY = min(minY, sy);
+    maxY = max(maxY, sy);
   } //<>//
   octagon.endShape(CLOSE);
 
-  Rail[] rails = new Rail[3]; 
+  Rail[] rails = new Rail[3];
   float hexRad = (maxX - minX) /2;
   int minLengthOfRail = 600;
   int maxLengthOfRail = 700;
@@ -157,25 +166,24 @@ void roundGenerator() {
     boolean doesIntersect = false;
     do {
       do {
-        st = new PVector(random( minX, maxX),random( minY, maxY));
-      } while (PVector.dist(st, octagonCentre) > hexRad);    
-      
+        st = new PVector(random( minX, maxX), random( minY, maxY));
+      } while (PVector.dist(st, octagonCentre) > hexRad);
+
       do {
-        float rad = random(minLengthOfRail,maxLengthOfRail);
+        float rad = random(minLengthOfRail, maxLengthOfRail);
         float Xmin = st.x - rad;
         float Xmax = st.x + rad;
         float Ymin = st.y - rad;
         float Ymax = st.y + rad;
-        en = new PVector(random( Xmin, Xmax),random( Ymin, Ymax));
-        radiusAchived = PVector.dist(st,en);
-      }  while (PVector.dist(en, octagonCentre) > hexRad && radiusAchived > minLengthOfRail && radiusAchived < maxLengthOfRail);
-      
-      rails[i] = new Rail(st,en);
+        en = new PVector(random( Xmin, Xmax), random( Ymin, Ymax));
+        radiusAchived = PVector.dist(st, en);
+      } while (PVector.dist(en, octagonCentre) > hexRad && radiusAchived > minLengthOfRail && radiusAchived < maxLengthOfRail);
+
+      rails[i] = new Rail(st, en);
       for (int j = i+1; j < 3; j++) {
-        doesIntersect = doesLineIntersect(rails[i],rails[j]);
+        doesIntersect = doesLineIntersect(rails[i], rails[j]);
         if (doesIntersect) break;
       }
-    
     } while (doesIntersect);
     collidableObjectList.add(rails[i]);
     visibleObjectList.add(rails[i]);
@@ -188,36 +196,33 @@ boolean doesLineIntersect (Rail r1, Rail r2) {
   if (x < r1.Xmin || x > r1.Xmax || x < r2.Xmin || x > r2.Xmax) {
     return false;
   }
-  
+
   float y = r1.m * x + r1.c;
   if (y < r1.Ymin || y > r1.Ymax || y < r2.Ymin || y > r2.Ymax) {
     return false;
   }
-  
+
   return true;
 }
 
 void transitionScreen() {
-   transitionCounter++;
-   textAlign(CENTER, CENTER);
-   textSize(52);
-   if (fade >= 200) incre = -10;   
-   else if (fade <= 50) incre = 10;
-   fade += incre;
-   fill(159,20,0, fade);
-   if (transitionCounter == 0) {
-     // add sound here
-   }
-   else if (transitionCounter < 150) {
-     text("I", 30, 50);
-   }
-   else if (transitionCounter < 300) {
-     text("I I", 30, 50);
-   }
-   else {
-     // add sound here as well
-     roundGenerator();
-   }
+  transitionCounter++;
+  textAlign(CENTER, CENTER);
+  textSize(52);
+  if (fade >= 200) incre = -10;
+  else if (fade <= 50) incre = 10;
+  fade += incre;
+  fill(159, 20, 0, fade);
+  if (transitionCounter == 0) {
+    // add sound here
+  } else if (transitionCounter < 150) {
+    text("I", 30, 50);
+  } else if (transitionCounter < 300) {
+    text("I I", 30, 50);
+  } else {
+    // add sound here as well
+    roundGenerator();
+  }
 }
 
 void drawStartScreen() {
@@ -327,7 +332,7 @@ void draw() {
   if (!backgroundMusic.isPlaying()) {
     backgroundMusic.loop();
   }
-  
+
   // this can be optimised by just removing the bullet and enemy from the collidableObjectList & visibleObjectList direclty from the collideWith class, however not the best coding practice
   List toRemove = collidableObjectList.stream().filter(e -> e instanceof Bullet).map(e -> (Bullet)e).filter(e -> e.life <= 0).collect(Collectors.toList());
   collidableObjectList.removeAll(toRemove);
@@ -351,42 +356,42 @@ void draw() {
     }
   }
   List<Particle> contactListWithParticleCollidingWithRails1 = contactList.stream()
-                                                            .filter(e -> e.collidableA instanceof Rail && e.collidableB instanceof Particle)
-                                                            .map(e -> (Particle)e.collidableB)
-                                                            .collect(Collectors.toList());
+    .filter(e -> e.collidableA instanceof Rail && e.collidableB instanceof Particle)
+    .map(e -> (Particle)e.collidableB)
+    .collect(Collectors.toList());
   List<Particle> contactListWithParticleCollidingWithRails2 = contactList.stream()
-                                                            .filter(e -> e.collidableB instanceof Rail && e.collidableA instanceof Particle)
-                                                            .map(e -> (Particle)e.collidableA)
-                                                            .collect(Collectors.toList());
+    .filter(e -> e.collidableB instanceof Rail && e.collidableA instanceof Particle)
+    .map(e -> (Particle)e.collidableA)
+    .collect(Collectors.toList());
   contactListWithParticleCollidingWithRails1.addAll(contactListWithParticleCollidingWithRails2);
   List<Particle> esfce = collidableObjectList.stream()
-                          .filter(e -> e instanceof Particle)
-                          .map(e -> (Particle)e)
-                          .filter(e -> e.state != ParticleMovementState.DEFAULT)
-                          .filter(e -> !contactListWithParticleCollidingWithRails1.contains(e))
-                          .collect(Collectors.toList());
+    .filter(e -> e instanceof Particle)
+    .map(e -> (Particle)e)
+    .filter(e -> e.state != ParticleMovementState.DEFAULT)
+    .filter(e -> !contactListWithParticleCollidingWithRails1.contains(e))
+    .collect(Collectors.toList());
   getOffRail(esfce);
-  for (Contact contact: contactList) {
-    if (contact.collidableA instanceof Bullet && contact.collidableB instanceof Bullet) continue; 
-    if (contact.collidableA instanceof Bullet && contact.collidableB instanceof Player) continue; 
-    if (contact.collidableA instanceof Player && contact.collidableB instanceof Bullet) continue; 
+  for (Contact contact : contactList) {
+    if (contact.collidableA instanceof Bullet && contact.collidableB instanceof Bullet) continue;
+    if (contact.collidableA instanceof Bullet && contact.collidableB instanceof Player) continue;
+    if (contact.collidableA instanceof Player && contact.collidableB instanceof Bullet) continue;
 
     if (contact.collidableA instanceof Rail && contact.collidableB instanceof Particle) {
       Rail rai = (Rail) contact.collidableA;
       Particle p = (Particle) contact.collidableB;
       if (p.state == ParticleMovementState.DEFAULT) {
-         getOnTheRail(p,rai);
+        getOnTheRail(p, rai);
       }
       contact.collidableB.addForce(p.trickForce);
-      continue; 
+      continue;
     } else if (contact.collidableB instanceof Rail && contact.collidableA instanceof Particle) {
       Rail rai = (Rail) contact.collidableB;
       Particle p = (Particle) contact.collidableA;
       if (p.state == ParticleMovementState.DEFAULT) {
-        getOnTheRail(p,rai);
+        getOnTheRail(p, rai);
       }
       contact.collidableA.addForce(p.trickForce);
-      continue; 
+      continue;
     }
     contact.resolve();
   }
@@ -395,7 +400,7 @@ void draw() {
   cameraY = player.pos.y - displayHeight/2;
 
   translate(-cameraX, -cameraY);
-  
+
   fill(230);
   rect(0, 0, mapWidth, mapHeight);
   shape(octagon, 0, 0);
@@ -424,10 +429,11 @@ void draw() {
   if (enemies.isEmpty()) {
     transitionScreen();
   }
-  
+
   if (!controlOpen) {
-    if (bulletRefillCount%30 == 0) {
-      player.bulletCount += 5;
+    if (bulletRefillCount%reloadFrames == 0) {
+      shotgunReloadSound.play();
+      player.bulletCount += 1;
     }
     bulletRefillCount++;
   }
@@ -440,27 +446,26 @@ void getOnTheRail(Particle p, Rail rai) {
     grindingSound.loop();
     stopPlayerFromMoving();
   }
-  p.forceAccumulator = new PVector(0,0);
+  p.forceAccumulator = new PVector(0, 0);
   PVector dir = p.getVelocity();
   float d = PVector.dot(dir, rai.getNormalisedVector());
   p.state = d>0 ? ParticleMovementState.RAILLEFT: ParticleMovementState.RAILRIGHT;
-  d *= -500; 
+  d *= -500;
   float maxSpeed = 3000;
   float minSpeed = 1500;
   if (abs(d) < minSpeed) {
     if (d<0) d = -minSpeed;
     else d = minSpeed;
-  }
-  else if (abs(d) > maxSpeed) {
+  } else if (abs(d) > maxSpeed) {
     if (d<0) d = -maxSpeed;
     else d = maxSpeed;
   }
   p.trickForce = rai.getNormalisedVector().copy().setMag(d);
-  GetClosestPoint(rai,p);
+  GetClosestPoint(rai, p);
   p.prevPos = p.pos.copy();
 }
 
-void GetClosestPoint(Rail r, Particle p){
+void GetClosestPoint(Rail r, Particle p) {
   PVector a_to_p = new PVector(p.pos.x - r.startPoint.x, p.pos.y - r.startPoint.y);
   PVector a_to_b = new PVector(r.endPoint.x - r.startPoint.x, r.endPoint.y - r.startPoint.y);
   float atb2 = a_to_b.x*a_to_b.x + a_to_b.y*a_to_b.y;
@@ -470,12 +475,12 @@ void GetClosestPoint(Rail r, Particle p){
 }
 
 void getOffRail(List<Particle> ps) {
-  
-  for (Particle p : ps){
+
+  for (Particle p : ps) {
     if (p instanceof Player) {
       grindingSound.pause();
       controlOpen = true;
-      bulletRefillCount = 0;
+      //bulletRefillCount = 0;
     }
     p.state = ParticleMovementState.DEFAULT;
     p.trickForce = null;
@@ -492,22 +497,22 @@ void stopPlayerFromMoving() {
 void keyPressed() {
   if (controlOpen) {
     switch (key) {
-      case 'w':
-      case 'W':
-        player.startMovingUp();
-        break;
-      case 'a':
-      case 'A':
-        player.startMovingLeft();
-        break;
-      case 's':
-      case 'S':
-        player.startMovingDown();
-        break;
-      case 'd':
-      case 'D':
-        player.startMovingRight();
-        break;
+    case 'w':
+    case 'W':
+      player.startMovingUp();
+      break;
+    case 'a':
+    case 'A':
+      player.startMovingLeft();
+      break;
+    case 's':
+    case 'S':
+      player.startMovingDown();
+      break;
+    case 'd':
+    case 'D':
+      player.startMovingRight();
+      break;
     }
   }
 }
@@ -555,12 +560,11 @@ void mouseReleased() {
 }
 
 void fireBullets() {
-  shotgunSound.play();
-  
-  if (player.bulletCount < 5) {
+  if (player.bulletCount < 1) {
     return;
   }
-  player.bulletCount -= 5;
+  shotgunSound.play();
+  player.bulletCount -= 1;
   for (int i = 0; i < 5; i++) {
     float angle = random(player.minAngle, player.maxAngle);
     PVector dir = PVector.fromAngle(angle).setMag(50);
