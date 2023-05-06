@@ -37,6 +37,7 @@ SoundFile backgroundMusic;
 SoundFile skatingSound;
 SoundFile shotgunSound;
 SoundFile shotgunReloadSound;
+SoundFile shotgunOutOfAmmoSound;
 SoundFile grindingSound;
 final int numLevelChangeSounds = 4;
 SoundFile[] levelChangeSounds = new SoundFile[numLevelChangeSounds];
@@ -68,6 +69,8 @@ void setup() {
   for (int i=0; i<4; i++) {
     levelChangeSounds[i] = new SoundFile(this, "roadman_sounds/level_change_" + i + ".wav");
   }
+  
+  shotgunOutOfAmmoSound = new SoundFile(this, "sound_effects/out_of_ammo.wav");
 
   reset();
 }
@@ -149,10 +152,10 @@ void roundGenerator() {
     prevSy = sy;
 
     minX = min(minX, sx);
-    maxX = max(maxX, sx);
+    maxX = max(maxX, sx); //<>//
     minY = min(minY, sy);
     maxY = max(maxY, sy);
-  } //<>//
+  }
   octagon.endShape(CLOSE);
 
   Rail[] rails = new Rail[3];
