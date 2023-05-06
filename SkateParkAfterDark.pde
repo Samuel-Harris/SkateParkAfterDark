@@ -28,7 +28,7 @@ List<Collidable> collidableObjectList;
 CollisionDetector collisionDetector;
 
 List<Enemy> enemies;
-int enemyCount; //<>// //<>//
+int enemyCount;
 PShape octagon;
 
 HUD hud;
@@ -90,7 +90,7 @@ void reset() {
   mouseOverRetryButton = false;
   mouseOverExitButton = false;
 
-  player = new Player(new PVector(mapWidth/2, mapHeight/2), skatingSound);
+  player = new Player(new PVector(mapWidth/2, mapHeight/2), skatingSound, stabSound);
 
   roundGenerator();
 }
@@ -152,7 +152,7 @@ void roundGenerator() {
 
     collidableObjectList.add(new LineSegment(new PVector(prevSx, prevSy), new PVector(sx, sy)));
     prevSx = sx;
-    prevSy = sy; //<>//
+    prevSy = sy;
 
     minX = min(minX, sx);
     maxX = max(maxX, sx); //<>//
