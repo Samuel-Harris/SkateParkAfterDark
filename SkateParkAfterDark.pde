@@ -17,7 +17,7 @@ int round, incre, fade, bulletRefillCount, coolOffRail;
 float mapWidth,
   mapHeight,
   cameraX,
-  cameraY, 
+  cameraY,
   transitionCounter,
   octagonRadius = 1500;
 
@@ -28,7 +28,7 @@ List<VisibleObject> visibleObjectList;
 List<Collidable> collidableObjectList;
 
 CollisionDetector collisionDetector;
- //<>// //<>// //<>//
+
 List<Enemy> enemies;
 int enemyCount;
 PShape octagon;
@@ -119,8 +119,7 @@ void roundGenerator() {
       enX = random(mapWidth);
       enY = random(mapHeight);
     }
-    //enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500));
-    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2, 10)), int(random(6, 13)), 500));
+    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500, characterSpriteWidth));
   }
 
 
