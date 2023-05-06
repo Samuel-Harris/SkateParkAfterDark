@@ -43,6 +43,7 @@ SoundFile shotgunOutOfAmmoSound;
 SoundFile stabSound;
 SoundFile grindingSound;
 final int numLevelChangeSounds = 4;
+int lastLevelChangeSound = -1;
 SoundFile[] levelChangeSounds = new SoundFile[numLevelChangeSounds];
 
 int reloadFrames = 30; 
@@ -96,10 +97,21 @@ void reset() {
   roundGenerator();
 }
 
-void roundGenerator() {
+void playLevelChangeSound() {
   if (!IntStream.range(0, numLevelChangeSounds).anyMatch(i -> levelChangeSounds[i].isPlaying())) {
-    levelChangeSounds[int(random(numLevelChangeSounds))].play();
+    int levelChangeSoundNum;
+    
+    do {
+      levelChangeSoundNum = int(random(numLevelChangeSounds));
+    } while (lastLevelChangeSound == levelChangeSoundNum);
+    
+    levelChangeSounds[levelChangeSoundNum].play();
+    lastLevelChangeSound = levelChangeSoundNum;
   }
+}
+
+void roundGenerator() {
+  playLevelChangeSound();
 
   incre = -10;
   fade = 200;
@@ -140,7 +152,7 @@ void roundGenerator() {
   float minY = 100000;
   float maxY = -100000;
 
-  PVector octagonCentre = new PVector(mapWidth/2, mapHeight/2);
+  PVector octagonCentre = new PVector(mapWidth/2, mapHeight/2); //<>//
   float EIGHTH_PI = PI / 8;
   octagon = createShape();
   octagon.beginShape();
@@ -548,7 +560,7 @@ void keyReleased() {
 void mouseReleased() {
   if (mouseOverStartButton) {
     startScreen = mouseOverStartButton = false;
-    levelChangeSounds[int(random(numLevelChangeSounds))].play();
+    playLevelChangeSound();
   } else if (mouseOverContinueButton) {
     pauseScreen = mouseOverContinueButton = false;
   } else if (mouseOverRetryButton) {
