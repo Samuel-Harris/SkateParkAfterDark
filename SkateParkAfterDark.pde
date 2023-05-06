@@ -12,12 +12,13 @@ boolean startScreen = true,
   controlOpen = true;
 
 
-int round, transitionCounter, incre, fade, bulletRefillCount;
+int round, transitionCounterMax, incre, fade, bulletRefillCount;
 
 float mapWidth,
   mapHeight,
   cameraX,
-  cameraY,
+  cameraY, 
+  transitionCounter,
   octagonRadius = 1500;
 
 Player player;
@@ -27,7 +28,7 @@ List<Collidable> collidableObjectList;
 
 CollisionDetector collisionDetector;
 
-List<Enemy> enemies;
+List<Enemy> enemies; //<>//
 int enemyCount;
 PShape octagon;
 
@@ -74,8 +75,8 @@ void setup() {
 
 void reset() {
   round = 0;
-  transitionCounter = 0;
   bulletRefillCount = 0;
+  transitionCounterMax = 300;
 
   startScreen = true;
   pauseScreen = false;
@@ -97,14 +98,14 @@ void roundGenerator() {
   incre = -10;
   fade = 200;
   round++;
-  transitionCounter = 0;
+  transitionCounter = transitionCounterMax;
   enemyCount = ceil(1.5 * round);
 
   cameraX = player.pos.x - displayWidth/2;
   cameraY = player.pos.y - displayHeight/2;
 
   enemies = new ArrayList();
-  for (int i = 0; i < enemyCount; i++) {
+  for (int i = 0; i < 1; i++) {
     float enX = random(mapWidth);
     float enY = random(mapHeight);
     while (dist(enX, enY, player.pos.x, player.pos.y)<2*displayWidth) {
@@ -119,7 +120,8 @@ void roundGenerator() {
   visibleObjectList.add(player);
   visibleObjectList.addAll(enemies);
 
-  hud = new HUD(player);
+  hud = new HUD(player, transitionCounterMax);
+  player.resetLives();
 
   collidableObjectList = new ArrayList();
   collidableObjectList.add(player);
@@ -152,7 +154,7 @@ void roundGenerator() {
     maxX = max(maxX, sx);
     minY = min(minY, sy);
     maxY = max(maxY, sy);
-  } //<>//
+  }
   octagon.endShape(CLOSE);
 
   Rail[] rails = new Rail[3];
@@ -204,7 +206,7 @@ boolean doesLineIntersect (Rail r1, Rail r2) {
 }
 
 void transitionScreen() {
-  transitionCounter++;
+  transitionCounter--;
   textAlign(CENTER, CENTER);
   textSize(52);
   if (fade >= 200) incre = -10;
@@ -212,13 +214,11 @@ void transitionScreen() {
   fade += incre;
   fill(159, 20, 0, fade);
   if (transitionCounter == 0) {
-    // add sound here
-  } else if (transitionCounter < 150) {
+  } else if (transitionCounter > transitionCounterMax/2) {
     text("I", 30, 50);
-  } else if (transitionCounter < 300) {
+  } else if (transitionCounter > 0) {
     text("I I", 30, 50);
   } else {
-    // add sound here as well
     roundGenerator();
   }
 }
@@ -414,8 +414,8 @@ void draw() {
   }
 
   if (player.getLives()<=0) {
-    drawGameOverScreen();
-    return;
+    //drawGameOverScreen();
+    //return;
   }
 
   for (VisibleObject visibleObject : visibleObjectList) {

@@ -25,7 +25,7 @@ class Player extends Particle {
     minAngle = 0;
     maxAngle = 0;
     moveForce = 3000;
-    bulletCount = 10;
+    bulletCount = 100;
     hitInvulnerabilityFrames = 30;
     hitInvulnerabilityFramesLeft = 0;
     this.skatingSound = skatingSound;
@@ -128,6 +128,10 @@ class Player extends Particle {
   
   int getMaxLives() {
     return maxLives;
+  }
+  
+  void resetLives() {
+    this.lives = maxLives;
   }
   
   void stopMoving() {
