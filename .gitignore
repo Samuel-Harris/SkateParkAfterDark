@@ -3,5 +3,7 @@
 .idea/
 *.mp3
 data/music/*.wav
-data/sound_effects/skating_sound_*.wav
-data/sound_effects/*_original.wav
+data/player_sounds/skating_sound_overlapping.wav
+data/*/*_original*
+data/*/*_source*
+*.autosave

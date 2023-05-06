@@ -1,18 +1,20 @@
 class Enemy extends Particle {
-  boolean isColliding;
   float MAX_HEALTH, health;
   Player player;
   float moveForce;
   PVector dir;
   int frameReaction;
+  PImage sprite;
   
-  public Enemy(PVector startPos, Player player, float moveForce, int frameReaction, float health) {
+  public Enemy(PVector startPos, Player player, float moveForce, int frameReaction, float health, int characterSpriteWidth) {
     super(startPos, 1500, 50);
     this.player = player;
     this.moveForce = moveForce;
     this.frameReaction = frameReaction;
     dir = new PVector(0,0);
     this.health = this.MAX_HEALTH = health;
+    sprite = loadImage("character_sprites/enemy.png");
+    sprite.resize(characterSpriteWidth, characterSpriteWidth);
   }
   
   public void draw() {
@@ -26,15 +28,14 @@ class Enemy extends Particle {
       integrate();
     }
 
-    if (isColliding) {
-      fill(0, 255, 0);
-      isColliding = false;
-    } else {
-      fill(255, 0, 0);
-    }
-    stroke(0);
-    circle(pos.x, pos.y, 2*radius);
     drawHealthBar();
+    
+    float angle = atan2(pos.y-prevPos.y, pos.x-prevPos.x);
+    pushMatrix();
+    translate(pos.x, pos.y);
+    rotate(angle);
+    image(sprite, 0, 0);
+    popMatrix();
   }
   
   public void drawHealthBar() {
@@ -57,6 +58,5 @@ class Enemy extends Particle {
   }
   
   void collideWith(Collidable other) {
-    isColliding = true;
   }
 }

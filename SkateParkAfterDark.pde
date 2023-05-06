@@ -28,7 +28,7 @@ List<Collidable> collidableObjectList;
 
 CollisionDetector collisionDetector;
 
-List<Enemy> enemies; //<>//
+List<Enemy> enemies; //<>// //<>//
 int enemyCount;
 PShape octagon;
 
@@ -118,7 +118,7 @@ void roundGenerator() {
       enX = random(mapWidth);
       enY = random(mapHeight);
     }
-    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500));
+    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500, characterSpriteWidth));
   }
 
 
@@ -152,7 +152,7 @@ void roundGenerator() {
     octagon.vertex(sx, sy);
 
     collidableObjectList.add(new LineSegment(new PVector(prevSx, prevSy), new PVector(sx, sy)));
-    prevSx = sx; //<>//
+    prevSx = sx; //<>// //<>//
     prevSy = sy;
 
     minX = min(minX, sx);
