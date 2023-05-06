@@ -28,7 +28,7 @@ List<Collidable> collidableObjectList;
 CollisionDetector collisionDetector;
 
 List<Enemy> enemies;
-int enemyCount; //<>//
+int enemyCount; //<>// //<>//
 PShape octagon;
 
 HUD hud;
@@ -38,6 +38,7 @@ SoundFile skatingSound;
 SoundFile shotgunSound;
 SoundFile shotgunReloadSound;
 SoundFile shotgunOutOfAmmoSound;
+SoundFile stabSound;
 SoundFile grindingSound;
 final int numLevelChangeSounds = 4;
 SoundFile[] levelChangeSounds = new SoundFile[numLevelChangeSounds];
@@ -71,6 +72,8 @@ void setup() {
   }
   
   shotgunOutOfAmmoSound = new SoundFile(this, "player_sounds/out_of_ammo.wav");
+  
+  stabSound = new SoundFile(this, "player_sounds/stab.wav");
 
   reset();
 }
@@ -149,7 +152,7 @@ void roundGenerator() {
 
     collidableObjectList.add(new LineSegment(new PVector(prevSx, prevSy), new PVector(sx, sy)));
     prevSx = sx;
-    prevSy = sy;
+    prevSy = sy; //<>//
 
     minX = min(minX, sx);
     maxX = max(maxX, sx); //<>//

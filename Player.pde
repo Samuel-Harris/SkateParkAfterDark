@@ -16,8 +16,9 @@ class Player extends Particle {
   float minAngle,maxAngle;
   PlayerSpeedEnum speedEnum;
   SoundFile skatingSound;
+  SoundFile stabSound;
   
-  public Player(PVector startPos, SoundFile skatingSound) {
+  public Player(PVector startPos, SoundFile skatingSound, SoundFile stabSound) {
     super(startPos, 1000.0, 50);
     canMove = true;
     maxLives = 3;
@@ -29,6 +30,7 @@ class Player extends Particle {
     hitInvulnerabilityFrames = 30;
     hitInvulnerabilityFramesLeft = 0;
     this.skatingSound = skatingSound;
+    this.stabSound = stabSound;
   }
   
   void draw() {
@@ -117,6 +119,7 @@ class Player extends Particle {
   
   void collideWith(Collidable other) {
     if (other instanceof Enemy && lives > 0 && hitInvulnerabilityFramesLeft == 0) {
+      stabSound.play();
       lives--;
       hitInvulnerabilityFramesLeft = hitInvulnerabilityFrames;
     }
