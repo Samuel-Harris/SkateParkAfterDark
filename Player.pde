@@ -25,7 +25,7 @@ class Player extends Particle {
     minAngle = 0;
     maxAngle = 0;
     moveForce = 3000;
-    bulletCount = 500;
+    bulletCount = 10;
     hitInvulnerabilityFrames = 30;
     hitInvulnerabilityFramesLeft = 0;
     this.skatingSound = skatingSound;
@@ -91,12 +91,12 @@ class Player extends Particle {
         if (speedEnum != PlayerSpeedEnum.SLOW) {
           speedEnum = PlayerSpeedEnum.SLOW;
           skatingSound.rate(1.2);
-          skatingSound.amp(0.1);
+          skatingSound.amp(0.2);
         }
       } else if (speedEnum != PlayerSpeedEnum.FAST) {
           speedEnum = PlayerSpeedEnum.FAST;
           skatingSound.rate(1.5);
-          skatingSound.amp(0.2);
+          skatingSound.amp(0.3);
       }
       
       if (!skatingSound.isPlaying()) {
