@@ -56,21 +56,21 @@ void setup() {
   backgroundMusic.amp(0.8);
   backgroundMusic.jump(int(random(backgroundMusic.duration())));
 
-  skatingSound = new SoundFile(this, "sound_effects/skating_sound.wav");
+  skatingSound = new SoundFile(this, "player_sounds/skating_sound.wav");
 
-  shotgunSound = new SoundFile(this, "sound_effects/shotgun_fire.wav");
+  shotgunSound = new SoundFile(this, "player_sounds/shotgun_fire.wav");
   shotgunSound.amp(0.2);
   
-  shotgunReloadSound = new SoundFile(this, "sound_effects/shotgun_reload.wav");
+  shotgunReloadSound = new SoundFile(this, "player_sounds/shotgun_reload.wav");
   shotgunReloadSound.amp(0.2);
 
-  grindingSound = new SoundFile(this, "sound_effects/grind.wav");
+  grindingSound = new SoundFile(this, "player_sounds/grind.wav");
 
   for (int i=0; i<4; i++) {
     levelChangeSounds[i] = new SoundFile(this, "roadman_sounds/level_change_" + i + ".wav");
   }
   
-  shotgunOutOfAmmoSound = new SoundFile(this, "sound_effects/out_of_ammo.wav");
+  shotgunOutOfAmmoSound = new SoundFile(this, "player_sounds/out_of_ammo.wav");
 
   reset();
 }
@@ -563,6 +563,7 @@ void mouseReleased() {
 
 void fireBullets() {
   if (player.bulletCount < 1) {
+    shotgunOutOfAmmoSound.play();
     return;
   }
   shotgunSound.play();
