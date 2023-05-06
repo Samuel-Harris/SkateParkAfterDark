@@ -91,12 +91,12 @@ class Player extends Particle {
         if (speedEnum != PlayerSpeedEnum.SLOW) {
           speedEnum = PlayerSpeedEnum.SLOW;
           skatingSound.rate(1.2);
-          skatingSound.amp(0.2);
+          skatingSound.amp(0.3);
         }
       } else if (speedEnum != PlayerSpeedEnum.FAST) {
           speedEnum = PlayerSpeedEnum.FAST;
           skatingSound.rate(1.5);
-          skatingSound.amp(0.3);
+          skatingSound.amp(0.4);
       }
       
       if (!skatingSound.isPlaying()) {

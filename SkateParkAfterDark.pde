@@ -28,7 +28,7 @@ List<Collidable> collidableObjectList;
 CollisionDetector collisionDetector;
 
 List<Enemy> enemies;
-int enemyCount;
+int enemyCount; //<>//
 PShape octagon;
 
 HUD hud;
@@ -415,6 +415,7 @@ void draw() {
 
   if (player.getLives()<=0) {
     drawGameOverScreen();
+    getOffRail(List.of(player));
     return;
   }
 
