@@ -111,7 +111,7 @@ void roundGenerator() {
   cameraY = player.pos.y - displayHeight/2;
 
   enemies = new ArrayList();
-  for (int i = 0; i < 1; i++) {
+  for (int i = 0; i < enemyCount; i++) {
     float enX = random(mapWidth);
     float enY = random(mapHeight);
     while (dist(enX, enY, player.pos.x, player.pos.y)<2*displayWidth) {
@@ -493,10 +493,6 @@ void getOffRail(List<Particle> ps) {
 }
 void stopPlayerFromMoving() {
   controlOpen = false;
-  //player.stopMovingUp();
-  //player.stopMovingLeft();
-  //player.stopMovingDown();
-  //player.stopMovingRight();
 }
 
 void keyPressed() {

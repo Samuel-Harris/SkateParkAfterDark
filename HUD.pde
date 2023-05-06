@@ -65,8 +65,6 @@ class HUD implements VisibleObject {
     }
     
     
-    
-    
     fill(255);
     textSize(104); 
     textAlign(CENTER,CENTER);
