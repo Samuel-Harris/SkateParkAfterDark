@@ -6,6 +6,7 @@ class Player extends Particle {
   int lives;
   int maxLives;
   int bulletCount;
+  int maxBullets;
   float moveForce;
   boolean isMovingLeft;
   boolean isMovingRight;
@@ -27,6 +28,7 @@ class Player extends Particle {
     maxAngle = 0;
     moveForce = 3000;
     bulletCount = 10;
+    maxBullets = 12;
     hitInvulnerabilityFrames = 30;
     hitInvulnerabilityFramesLeft = 0;
     this.skatingSound = skatingSound;
@@ -122,6 +124,12 @@ class Player extends Particle {
       stabSound.play();
       lives--;
       hitInvulnerabilityFramesLeft = hitInvulnerabilityFrames;
+    }
+  }
+  
+  void gainBullet() {
+    if (bulletCount < maxBullets) {
+      bulletCount += 1;
     }
   }
   
