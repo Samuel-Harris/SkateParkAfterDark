@@ -28,7 +28,7 @@ List<Collidable> collidableObjectList;
 
 CollisionDetector collisionDetector;
 
-List<Enemy> enemies; //<>//
+List<Enemy> enemies; //<>// //<>//
 int enemyCount;
 PShape octagon;
 
@@ -157,10 +157,9 @@ void roundGenerator() {
     prevSy = sy;
 
     minX = min(minX, sx);
-    maxX = max(maxX, sx); //<>//
+    maxX = max(maxX, sx);
     minY = min(minY, sy);
     maxY = max(maxY, sy);
-  }
   }
   octagon.endShape(CLOSE);
 
