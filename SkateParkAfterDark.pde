@@ -28,7 +28,7 @@ CollisionDetector collisionDetector;
 
 List<Enemy> enemies;
 int enemyCount; //<>//
-PShape octagon; //<>//
+PShape octagon; //<>// //<>//
 
 HUD hud;
 
@@ -135,7 +135,7 @@ void roundGenerator() {
     maxX = max(maxX, sx);  
     minY = min(minY, sy);  
     maxY = max(maxY, sy);  
-  } //<>//
+  } //<>// //<>//
   octagon.endShape(CLOSE);
 
   Rail[] rails = new Rail[3]; 
@@ -145,7 +145,6 @@ void roundGenerator() {
   for (int i = 2; i >= 0; i--) {
     PVector st;
     PVector en;
-    float radiusAchived;
     boolean doesIntersect = false;
     do {
       do {
@@ -159,8 +158,7 @@ void roundGenerator() {
         float Ymin = st.y - rad;
         float Ymax = st.y + rad;
         en = new PVector(random( Xmin, Xmax),random( Ymin, Ymax));
-        radiusAchived = PVector.dist(st,en);
-      }  while (PVector.dist(en, octagonCentre) > hexRad && radiusAchived > minLengthOfRail && radiusAchived < maxLengthOfRail);
+      }  while (PVector.dist(en, octagonCentre) > hexRad);
       
       rails[i] = new Rail(st,en);
       for (int j = i+1; j < 3; j++) {
