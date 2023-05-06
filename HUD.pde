@@ -47,7 +47,7 @@ class HUD implements VisibleObject {
     }
     
     if (livesLeft < player.getMaxLives()) {
-      if (transitionCounter == transitionCounterMax) {
+      if (transitionCounter == 0) {
         image(heartSprites[(int) ((numHeartSprites - 1) * (1 - player.getHitInvulnerabilityFramesLeft() / hitInvulnerabilityFrames))], heartXPositions[livesLeft], height - heartWidth);
       }
       else {
@@ -56,7 +56,7 @@ class HUD implements VisibleObject {
         for (int i = livesLeft; i < player.getMaxLives(); i++) {
           image(heartSprites[i < heartIndex ? 0 : i == heartIndex ? decwea : (numHeartSprites - 1)], heartXPositions[i], height - heartWidth);
         }
-        if (decwea == 0) { //<>//
+        if (decwea == 0) { //<>// //<>//
           numRevivedHearts++;
           this.reviveCounter = transitionCounterFrames;
         }

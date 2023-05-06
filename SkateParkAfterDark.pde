@@ -12,7 +12,7 @@ boolean startScreen = true,
   controlOpen = true;
 
 
-int round, transitionCounterMax, incre, fade, bulletRefillCount;
+int round, incre, fade, bulletRefillCount;
 
 float mapWidth,
   mapHeight,
@@ -28,7 +28,7 @@ List<VisibleObject> visibleObjectList;
 List<Collidable> collidableObjectList;
 
 CollisionDetector collisionDetector;
-
+ //<>// //<>//
 List<Enemy> enemies;
 int enemyCount;
 PShape octagon;
@@ -83,7 +83,6 @@ void setup() {
 void reset() {
   round = 0;
   bulletRefillCount = 0;
-  transitionCounterMax = 300;
 
   startScreen = true;
   pauseScreen = false;
@@ -105,7 +104,7 @@ void roundGenerator() {
   incre = -10;
   fade = 200;
   round++;
-  transitionCounter = transitionCounterMax;
+  transitionCounter = 0;
   enemyCount = ceil(1.5 * round);
 
   cameraX = player.pos.x - displayWidth/2;
@@ -127,7 +126,7 @@ void roundGenerator() {
   visibleObjectList.add(player);
   visibleObjectList.addAll(enemies);
 
-  hud = new HUD(player, transitionCounterMax);
+  hud = new HUD(player, 300);
   player.resetLives();
 
   collidableObjectList = new ArrayList();
@@ -213,7 +212,7 @@ boolean doesLineIntersect (Rail r1, Rail r2) {
 }
 
 void transitionScreen() {
-  transitionCounter--;
+  transitionCounter++;
   textAlign(CENTER, CENTER);
   textSize(52);
   if (fade >= 200) incre = -10;
@@ -221,9 +220,9 @@ void transitionScreen() {
   fade += incre;
   fill(159, 20, 0, fade);
   if (transitionCounter == 0) {
-  } else if (transitionCounter > transitionCounterMax/2) {
+  } else if (transitionCounter < 150) {
     text("I", 30, 50);
-  } else if (transitionCounter > 0) {
+  } else if (transitionCounter < 300) {
     text("I I", 30, 50);
   } else {
     roundGenerator();
