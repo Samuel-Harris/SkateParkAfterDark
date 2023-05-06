@@ -12,12 +12,13 @@ boolean startScreen = true,
   controlOpen = true;
 
 
-int round, transitionCounter, incre, fade, bulletRefillCount;
+int round, incre, fade, bulletRefillCount;
 
 float mapWidth,
   mapHeight,
   cameraX,
   cameraY,
+  transitionCounter,
   octagonRadius = 1500;
 
 int characterSpriteWidth = 200;
@@ -28,7 +29,7 @@ List<Collidable> collidableObjectList;
 
 CollisionDetector collisionDetector;
 
-List<Enemy> enemies; //<>// //<>//
+List<Enemy> enemies;
 int enemyCount;
 PShape octagon;
 
@@ -81,7 +82,6 @@ void setup() {
 
 void reset() {
   round = 0;
-  transitionCounter = 0;
   bulletRefillCount = 0;
 
   startScreen = true;
@@ -126,7 +126,8 @@ void roundGenerator() {
   visibleObjectList.add(player);
   visibleObjectList.addAll(enemies);
 
-  hud = new HUD(player);
+  hud = new HUD(player, 300);
+  player.resetLives();
 
   collidableObjectList = new ArrayList();
   collidableObjectList.add(player);
@@ -152,11 +153,11 @@ void roundGenerator() {
     octagon.vertex(sx, sy);
 
     collidableObjectList.add(new LineSegment(new PVector(prevSx, prevSy), new PVector(sx, sy)));
-    prevSx = sx; //<>// //<>//
+    prevSx = sx;
     prevSy = sy;
 
     minX = min(minX, sx);
-    maxX = max(maxX, sx); //<>//
+    maxX = max(maxX, sx);
     minY = min(minY, sy);
     maxY = max(maxY, sy);
   }
@@ -219,13 +220,11 @@ void transitionScreen() {
   fade += incre;
   fill(159, 20, 0, fade);
   if (transitionCounter == 0) {
-    // add sound here
   } else if (transitionCounter < 150) {
     text("I", 30, 50);
   } else if (transitionCounter < 300) {
     text("I I", 30, 50);
   } else {
-    // add sound here as well
     roundGenerator();
   }
 }
@@ -494,10 +493,6 @@ void getOffRail(List<Particle> ps) {
 }
 void stopPlayerFromMoving() {
   controlOpen = false;
-  //player.stopMovingUp();
-  //player.stopMovingLeft();
-  //player.stopMovingDown();
-  //player.stopMovingRight();
 }
 
 void keyPressed() {

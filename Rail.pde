@@ -18,7 +18,14 @@ class Rail extends LineSegment implements VisibleObject {
   public void draw() {
     strokeWeight(35);
     strokeCap(ROUND);
-    stroke(200, 200, 200);
+    if (transitionCounter == 0) {
+      stroke(200, 200, 200);
+    }
+    else if ((transitionCounter / 4) % 2 == 0) {
+      stroke(0, 0, 100);
+    } else {
+      stroke(200, 10, 20);
+    }
     line(startPoint.x, startPoint.y, endPoint.x, endPoint.y);
     strokeWeight(4);
   }

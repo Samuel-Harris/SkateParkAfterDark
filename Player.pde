@@ -148,6 +148,10 @@ class Player extends Particle {
     return maxLives;
   }
   
+  void resetLives() {
+    this.lives = maxLives;
+  }
+  
   void stopMoving() {
     canMove = false;
   }
