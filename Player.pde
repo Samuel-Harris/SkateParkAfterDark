@@ -18,8 +18,9 @@ class Player extends Particle {
   PlayerSpeedEnum speedEnum;
   SoundFile skatingSound;
   SoundFile stabSound;
+  PImage sprite;
   
-  public Player(PVector startPos, SoundFile skatingSound, SoundFile stabSound) {
+  public Player(PVector startPos, SoundFile skatingSound, SoundFile stabSound, int characterSpriteWidth) {
     super(startPos, 1000.0, 50);
     canMove = true;
     maxLives = 3;
@@ -33,6 +34,8 @@ class Player extends Particle {
     hitInvulnerabilityFramesLeft = 0;
     this.skatingSound = skatingSound;
     this.stabSound = stabSound;
+    sprite = loadImage("character_sprites/player.png");
+    sprite.resize(characterSpriteWidth, characterSpriteWidth);
   }
   
   void draw() {
@@ -72,15 +75,19 @@ class Player extends Particle {
       fill(0);
     }
     
-    stroke(0);
-    circle(pos.x, pos.y, 2*radius);
     float angle = atan2(cameraY+mouseY - pos.y, cameraX+mouseX - pos.x );
     minAngle = angle-QUARTER_PI/3;
     maxAngle = angle+QUARTER_PI/3;
-    fill(244);
-    stroke(244);
-    arc(pos.x, pos.y, 200, 200, minAngle, maxAngle);
-    ellipseMode(CENTER); 
+    //fill(255, 0, 0, 100);
+    //stroke(255, 0, 0, 100);
+    //arc(pos.x, pos.y, 200, 200, minAngle, maxAngle);
+    //ellipseMode(CENTER); 
+    
+    pushMatrix();
+    translate(pos.x, pos.y);
+    rotate(angle);
+    image(sprite, 0, 0);
+    popMatrix();
   }
   
   void integrate() {

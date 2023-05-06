@@ -20,6 +20,7 @@ float mapWidth,
   cameraY,
   octagonRadius = 1500;
 
+int characterSpriteWidth = 200;
 Player player;
 
 List<VisibleObject> visibleObjectList;
@@ -27,7 +28,7 @@ List<Collidable> collidableObjectList;
 
 CollisionDetector collisionDetector;
 
-List<Enemy> enemies;
+List<Enemy> enemies; //<>//
 int enemyCount;
 PShape octagon;
 
@@ -90,7 +91,7 @@ void reset() {
   mouseOverRetryButton = false;
   mouseOverExitButton = false;
 
-  player = new Player(new PVector(mapWidth/2, mapHeight/2), skatingSound, stabSound);
+  player = new Player(new PVector(mapWidth/2, mapHeight/2), skatingSound, stabSound, characterSpriteWidth);
 
   roundGenerator();
 }
@@ -151,7 +152,7 @@ void roundGenerator() {
     octagon.vertex(sx, sy);
 
     collidableObjectList.add(new LineSegment(new PVector(prevSx, prevSy), new PVector(sx, sy)));
-    prevSx = sx;
+    prevSx = sx; //<>//
     prevSy = sy;
 
     minX = min(minX, sx);
@@ -438,7 +439,7 @@ void draw() {
   if (!controlOpen) {
     if (bulletRefillCount%reloadFrames == 0) {
       shotgunReloadSound.play();
-      player.bulletCount += 1;
+      player.gainBullet();
     }
     bulletRefillCount++;
   }
