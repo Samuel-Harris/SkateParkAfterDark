@@ -191,4 +191,5 @@ class Player extends Particle {
   void stopMovingDown() {
     isMovingDown = false;
   }
+  
 }

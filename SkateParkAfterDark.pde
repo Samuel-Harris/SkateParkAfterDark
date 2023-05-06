@@ -12,7 +12,7 @@ boolean startScreen = true,
   controlOpen = true;
 
 
-int round, incre, fade, bulletRefillCount;
+int round, incre, fade, bulletRefillCount, coolOffRail;
 
 float mapWidth,
   mapHeight,
@@ -28,7 +28,7 @@ List<VisibleObject> visibleObjectList;
 List<Collidable> collidableObjectList;
 
 CollisionDetector collisionDetector;
- //<>// //<>//
+ //<>// //<>// //<>//
 List<Enemy> enemies;
 int enemyCount;
 PShape octagon;
@@ -83,6 +83,7 @@ void setup() {
 void reset() {
   round = 0;
   bulletRefillCount = 0;
+  coolOffRail = 60;
 
   startScreen = true;
   pauseScreen = false;
@@ -118,7 +119,8 @@ void roundGenerator() {
       enX = random(mapWidth);
       enY = random(mapHeight);
     }
-    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500));
+    //enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500));
+    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2, 10)), int(random(6, 13)), 500));
   }
 
 
@@ -153,7 +155,7 @@ void roundGenerator() {
     octagon.vertex(sx, sy);
 
     collidableObjectList.add(new LineSegment(new PVector(prevSx, prevSy), new PVector(sx, sy)));
-    prevSx = sx; //<>//
+    prevSx = sx;
     prevSy = sy;
 
     minX = min(minX, sx);
@@ -359,6 +361,7 @@ void draw() {
       }
     }
   }
+  
   List<Particle> contactListWithParticleCollidingWithRails1 = contactList.stream()
     .filter(e -> e.collidableA instanceof Rail && e.collidableB instanceof Particle)
     .map(e -> (Particle)e.collidableB)
@@ -375,6 +378,11 @@ void draw() {
     .filter(e -> !contactListWithParticleCollidingWithRails1.contains(e))
     .collect(Collectors.toList());
   getOffRail(esfce);
+  
+  if (coolOffRail < 60){
+    if (--coolOffRail == 0) coolOffRail = 60;
+  }
+  
   for (Contact contact : contactList) {
     if (contact.collidableA instanceof Bullet && contact.collidableB instanceof Bullet) continue;
     if (contact.collidableA instanceof Bullet && contact.collidableB instanceof Player) continue;
@@ -384,6 +392,7 @@ void draw() {
       Rail rai = (Rail) contact.collidableA;
       Particle p = (Particle) contact.collidableB;
       if (p.state == ParticleMovementState.DEFAULT) {
+        if (p instanceof Player && coolOffRail < 60) continue;
         getOnTheRail(p, rai);
       }
       contact.collidableB.addForce(p.trickForce);
@@ -392,6 +401,7 @@ void draw() {
       Rail rai = (Rail) contact.collidableB;
       Particle p = (Particle) contact.collidableA;
       if (p.state == ParticleMovementState.DEFAULT) {
+        if (p instanceof Player && coolOffRail < 60) continue;
         getOnTheRail(p, rai);
       }
       contact.collidableA.addForce(p.trickForce);
@@ -480,17 +490,24 @@ void GetClosestPoint(Rail r, Particle p) {
 }
 
 void getOffRail(List<Particle> ps) {
-
   for (Particle p : ps) {
+    getOffRail(p);
+  }
+}
+
+void getOffRail(Particle p) {
     if (p instanceof Player) {
       grindingSound.pause();
       controlOpen = true;
-      //bulletRefillCount = 0;
+      float angle = atan2(cameraY+mouseY - p.pos.y, cameraX+mouseX - p.pos.x );
+      PVector force = PVector.fromAngle(angle).setMag(1000);
+      p.addForce(force);
+      coolOffRail = 59;
     }
     p.state = ParticleMovementState.DEFAULT;
     p.trickForce = null;
-  }
 }
+
 void stopPlayerFromMoving() {
   controlOpen = false;
 }
@@ -514,6 +531,13 @@ void keyPressed() {
     case 'D':
       player.startMovingRight();
       break;
+    }
+  }
+  else {
+    if (key == ' '){
+      print("hello");
+      
+      getOffRail(player);
     }
   }
 }
