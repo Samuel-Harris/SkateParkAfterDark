@@ -6,6 +6,7 @@ class Player extends Particle {
   int lives;
   int maxLives;
   int bulletCount;
+  int maxBullets;
   float moveForce;
   boolean isMovingLeft;
   boolean isMovingRight;
@@ -16,8 +17,9 @@ class Player extends Particle {
   float minAngle,maxAngle;
   PlayerSpeedEnum speedEnum;
   SoundFile skatingSound;
+  SoundFile stabSound;
   
-  public Player(PVector startPos, SoundFile skatingSound) {
+  public Player(PVector startPos, SoundFile skatingSound, SoundFile stabSound) {
     super(startPos, 1000.0, 50);
     canMove = true;
     maxLives = 3;
@@ -25,10 +27,12 @@ class Player extends Particle {
     minAngle = 0;
     maxAngle = 0;
     moveForce = 3000;
-    bulletCount = 100;
+    bulletCount = 10;
+    maxBullets = 12;
     hitInvulnerabilityFrames = 30;
     hitInvulnerabilityFramesLeft = 0;
     this.skatingSound = skatingSound;
+    this.stabSound = stabSound;
   }
   
   void draw() {
@@ -91,12 +95,12 @@ class Player extends Particle {
         if (speedEnum != PlayerSpeedEnum.SLOW) {
           speedEnum = PlayerSpeedEnum.SLOW;
           skatingSound.rate(1.2);
-          skatingSound.amp(0.2);
+          skatingSound.amp(0.3);
         }
       } else if (speedEnum != PlayerSpeedEnum.FAST) {
           speedEnum = PlayerSpeedEnum.FAST;
           skatingSound.rate(1.5);
-          skatingSound.amp(0.3);
+          skatingSound.amp(0.4);
       }
       
       if (!skatingSound.isPlaying()) {
@@ -117,8 +121,15 @@ class Player extends Particle {
   
   void collideWith(Collidable other) {
     if (other instanceof Enemy && lives > 0 && hitInvulnerabilityFramesLeft == 0) {
+      stabSound.play();
       lives--;
       hitInvulnerabilityFramesLeft = hitInvulnerabilityFrames;
+    }
+  }
+  
+  void gainBullet() {
+    if (bulletCount < maxBullets) {
+      bulletCount += 1;
     }
   }
   
