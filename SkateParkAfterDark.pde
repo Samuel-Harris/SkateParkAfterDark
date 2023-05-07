@@ -463,8 +463,8 @@ void draw() {
     .collect(Collectors.toList());
   getOffRail(esfce);
   
-  if (coolOffRail < 60){
-    if (--coolOffRail == 0) coolOffRail = 60;
+  if (coolOffRail < 30){
+    if (--coolOffRail == 0) coolOffRail = 30;
   }
   
   for (Contact contact : contactList) {
@@ -476,7 +476,7 @@ void draw() {
       Rail rai = (Rail) contact.collidableA;
       Particle p = (Particle) contact.collidableB;
       if (p.state == ParticleMovementState.DEFAULT) {
-        if (p instanceof Player && coolOffRail < 60) continue;
+        if (p instanceof Player && coolOffRail < 30) continue;
         getOnTheRail(p, rai);
       }
       contact.collidableB.addForce(p.trickForce);
@@ -485,7 +485,7 @@ void draw() {
       Rail rai = (Rail) contact.collidableB;
       Particle p = (Particle) contact.collidableA;
       if (p.state == ParticleMovementState.DEFAULT) {
-        if (p instanceof Player && coolOffRail < 60) continue;
+        if (p instanceof Player && coolOffRail < 30) continue;
         getOnTheRail(p, rai);
       }
       contact.collidableA.addForce(p.trickForce);
@@ -589,7 +589,7 @@ void getOffRail(Particle p) {
       float angle = atan2(cameraY+mouseY - p.pos.y, cameraX+mouseX - p.pos.x );
       PVector force = PVector.fromAngle(angle).setMag(1000);
       p.addForce(force);
-      coolOffRail = 59;
+      coolOffRail = 29;
     }
     p.state = ParticleMovementState.DEFAULT;
     p.trickForce = null;
