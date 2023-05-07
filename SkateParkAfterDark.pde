@@ -152,7 +152,7 @@ void roundGenerator() {
     enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500, characterSpriteWidth));
   }
   
-  visibleObjectList = new ArrayList(); //<>//
+  visibleObjectList = new ArrayList();
   visibleObjectList.add(player);
   visibleObjectList.addAll(enemies);
   
@@ -199,7 +199,7 @@ void roundGenerator() {
   minY += distanceFromSide;
   maxY -= distanceFromSide;
 
-  int numRails = 4;
+  int numRails = 5;
   Rail[] rails = new Rail[numRails];
   float hexRad = (maxX - minX) /2;
   int minLengthOfRail = 600;
