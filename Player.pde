@@ -28,8 +28,8 @@ class Player extends Particle {
     minAngle = 0;
     maxAngle = 0;
     moveForce = 3000;
-    bulletCount = 10;
-    maxBullets = 12;
+    bulletCount = 6;
+    maxBullets = 8;
     hitInvulnerabilityFrames = 30;
     hitInvulnerabilityFramesLeft = 0;
     this.skatingSound = skatingSound;
@@ -137,6 +137,7 @@ class Player extends Particle {
   void gainBullet() {
     if (bulletCount < maxBullets) {
       bulletCount += 1;
+      shotgunReloadSound.play();
     }
   }
   
@@ -150,6 +151,14 @@ class Player extends Particle {
   
   void resetLives() {
     this.lives = maxLives;
+  }
+  
+  int getBulletCount() {
+    return bulletCount;
+  }
+  
+  int getMaxBullets() {
+    return maxBullets;
   }
   
   void stopMoving() {
@@ -191,5 +200,4 @@ class Player extends Particle {
   void stopMovingDown() {
     isMovingDown = false;
   }
-  
 }

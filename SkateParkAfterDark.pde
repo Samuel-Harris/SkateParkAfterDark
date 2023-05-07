@@ -74,7 +74,8 @@ void setup() {
   shotgunSound.amp(0.2);
   
   shotgunReloadSound = new SoundFile(this, "player_sounds/shotgun_reload.wav");
-  shotgunReloadSound.amp(0.2);
+  shotgunReloadSound.amp(0.4);
+  shotgunReloadSound.rate(1.2);
 
   grindingSound = new SoundFile(this, "player_sounds/grind.wav");
 
@@ -110,6 +111,10 @@ void reset() {
   roundGenerator();
   
   deathSoundHasBeenPlayed = false;
+  deathSoundState = DeathSoundState.NOT_PLAYING;
+  if (deathSound.isPlaying()) {
+    deathSound.stop();
+  }
 }
 
 void playLevelChangeSound() {
@@ -147,12 +152,11 @@ void roundGenerator() {
     }
     enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500, characterSpriteWidth));
   }
-
-
+ //<>//
   visibleObjectList = new ArrayList();
   visibleObjectList.add(player);
   visibleObjectList.addAll(enemies);
- //<>//
+  
   hud = new HUD(player, 300);
   player.resetLives();
 
@@ -239,6 +243,8 @@ boolean doesLineIntersect (Rail r1, Rail r2) {
 }
 
 void transitionScreen() {
+  int transitionCounterMax = 300;
+  
   transitionCounter++;
   textAlign(CENTER, CENTER);
   textSize(52);
@@ -247,12 +253,16 @@ void transitionScreen() {
   fade += incre;
   fill(159, 20, 0, fade);
   if (transitionCounter == 0) {
-  } else if (transitionCounter < 150) {
+  } else if (transitionCounter < transitionCounterMax / 2) {
     text("I", 30, 50);
-  } else if (transitionCounter < 300) {
+  } else if (transitionCounter < transitionCounterMax) {
     text("I I", 30, 50);
   } else {
     roundGenerator();
+  }
+  
+  if (transitionCounter >= player.getBulletCount() * transitionCounterMax / player.getMaxBullets()) {
+    player.gainBullet();
   }
 }
 
@@ -475,7 +485,6 @@ void draw() {
 
   if (!controlOpen) {
     if (bulletRefillCount%reloadFrames == 0) {
-      shotgunReloadSound.play();
       player.gainBullet();
     }
     bulletRefillCount++;
