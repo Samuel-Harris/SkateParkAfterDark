@@ -42,11 +42,17 @@ SoundFile shotgunReloadSound;
 SoundFile shotgunOutOfAmmoSound;
 SoundFile stabSound;
 SoundFile grindingSound;
+SoundFile deathSound;
 final int numLevelChangeSounds = 4;
 int lastLevelChangeSound = -1;
 SoundFile[] levelChangeSounds = new SoundFile[numLevelChangeSounds];
 
-int reloadFrames = 30; 
+int reloadFrames = 30;
+
+DeathSoundState deathSoundState;
+boolean deathSoundHasBeenPlayed;
+final int deathSoundPauseFrames = 60;
+int currDeathSoundPauseFrames;
 
 void setup() {
   imageMode(CENTER);
@@ -77,6 +83,10 @@ void setup() {
   shotgunOutOfAmmoSound = new SoundFile(this, "player_sounds/out_of_ammo.wav");
   
   stabSound = new SoundFile(this, "player_sounds/stab.wav");
+  
+  deathSound = new SoundFile(this, "player_sounds/death.wav");
+  
+  deathSoundState = DeathSoundState.NOT_PLAYING;
 
   reset();
 }
@@ -96,6 +106,8 @@ void reset() {
   player = new Player(new PVector(mapWidth/2, mapHeight/2), skatingSound, stabSound, characterSpriteWidth);
 
   roundGenerator();
+  
+  deathSoundHasBeenPlayed = false;
 }
 
 void playLevelChangeSound() {
@@ -140,7 +152,7 @@ void roundGenerator() {
   visibleObjectList.addAll(enemies);
 
   hud = new HUD(player, 300);
-  player.resetLives();
+  player.resetLives(); //<>//
 
   collidableObjectList = new ArrayList();
   collidableObjectList.add(player);
@@ -346,7 +358,7 @@ void drawGameOverScreen() {
 }
 
 void draw() {
-  if (!backgroundMusic.isPlaying()) {
+  if (!backgroundMusic.isPlaying() && deathSoundState == DeathSoundState.NOT_PLAYING) {
     backgroundMusic.loop();
   }
 
@@ -442,6 +454,9 @@ void draw() {
 
   if (player.getLives()<=0) {
     drawGameOverScreen();
+    if (!deathSoundHasBeenPlayed) {
+      playDeathSound();
+    }
     getOffRail(List.of(player));
     return;
   }
@@ -465,6 +480,39 @@ void draw() {
   }
 
   hud.draw();
+}
+
+void playDeathSound() {
+  if (backgroundMusic.isPlaying()) {  // player just died, start death sound sequence
+    backgroundMusic.pause();
+    deathSoundState = DeathSoundState.BEGINNING_PAUSE;
+    currDeathSoundPauseFrames = deathSoundPauseFrames;
+  } else {
+    switch (deathSoundState) {
+      case BEGINNING_PAUSE:
+        if (currDeathSoundPauseFrames > 0) {
+          currDeathSoundPauseFrames -= 1;
+        } else {
+          currDeathSoundPauseFrames = deathSoundPauseFrames;
+          deathSoundState = DeathSoundState.DEATH_SOUND;
+          deathSound.play();
+        }
+        break;
+      case DEATH_SOUND:
+        if (!deathSound.isPlaying()) {
+          deathSoundState = DeathSoundState.END_PAUSE;
+        }
+        break;
+      case END_PAUSE:
+        if (currDeathSoundPauseFrames > 0) {
+          currDeathSoundPauseFrames -= 1;
+        } else {
+          currDeathSoundPauseFrames = deathSoundPauseFrames;
+          deathSoundState = DeathSoundState.NOT_PLAYING;
+          backgroundMusic.loop();
+        }
+    }
+  }
 }
 
 void getOnTheRail(Particle p, Rail rai) {
@@ -546,8 +594,6 @@ void keyPressed() {
   }
   else {
     if (key == ' '){
-      print("hello");
-      
       getOffRail(player);
     }
   }
