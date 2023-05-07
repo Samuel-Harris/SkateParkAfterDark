@@ -151,7 +151,7 @@ void roundGenerator() {
     }
     enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500, characterSpriteWidth));
   }
- //<>//
+  
   visibleObjectList = new ArrayList(); //<>//
   visibleObjectList.add(player);
   visibleObjectList.addAll(enemies);
@@ -192,31 +192,36 @@ void roundGenerator() {
     maxY = max(maxY, sy);
   }
   octagon.endShape(CLOSE);
+  
+  int distanceFromSide = 100;
+  minX += distanceFromSide;
+  maxX -= distanceFromSide;
+  minY += distanceFromSide;
+  maxY -= distanceFromSide;
 
-  Rail[] rails = new Rail[3];
+  int numRails = 4;
+  Rail[] rails = new Rail[numRails];
   float hexRad = (maxX - minX) /2;
   int minLengthOfRail = 600;
-  int maxLengthOfRail = 700;
-  for (int i = 2; i >= 0; i--) {
-    PVector st;
-    PVector en;
+  int maxLengthOfRail = 900;
+  
+  for (int i = numRails-1; i >= 0; i--) {
+    PVector start;
+    PVector end;
     boolean doesIntersect = false;
+    float railLength;
     do {
       do {
-        st = new PVector(random( minX, maxX), random( minY, maxY));
-      } while (PVector.dist(st, octagonCentre) > hexRad);
-
-      do {
-        float rad = random(minLengthOfRail, maxLengthOfRail);
-        float Xmin = st.x - rad;
-        float Xmax = st.x + rad;
-        float Ymin = st.y - rad;
-        float Ymax = st.y + rad;
-        en = new PVector(random( Xmin, Xmax),random( Ymin, Ymax));
-      }  while (PVector.dist(en, octagonCentre) > hexRad);
+        do {
+          start = new PVector(random(minX, maxX), random(minY, maxY));
+        } while (PVector.dist(start, octagonCentre) > hexRad);
+        
+        end = new PVector(random(minX, maxX),random(minY, maxY));
+        railLength = start.dist(end);
+      }  while (PVector.dist(end, octagonCentre) > hexRad || railLength < minLengthOfRail || railLength > maxLengthOfRail);
       
-      rails[i] = new Rail(st,en);
-      for (int j = i+1; j < 3; j++) {
+      rails[i] = new Rail(start, end);
+      for (int j = i+1; j < numRails; j++) {
         doesIntersect = doesLineIntersect(rails[i], rails[j]);
         if (doesIntersect) break;
       }
