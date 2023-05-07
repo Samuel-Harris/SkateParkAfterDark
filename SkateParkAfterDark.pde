@@ -14,13 +14,21 @@ boolean startScreen = true,
 
 int round, incre, fade, bulletRefillCount, coolOffRail;
 
+String roundString;
+
 float mapWidth,
   mapHeight,
   cameraX,
   cameraY,
   transitionCounter,
-  octagonRadius = 1500;
-
+  octagonRadius = 1500,   
+  octagonMinX = 100000,
+  octagonMaxX = -100000,
+  octagonMinY = 100000,
+  octagonMaxY = -100000, 
+  tileXCount, tileYCount,
+  tileWidth, tileHeight;
+ //<>//
 int characterSpriteWidth = 200;
 Player player;
 
@@ -32,6 +40,8 @@ CollisionDetector collisionDetector;
 List<Enemy> enemies;
 int enemyCount;
 PShape octagon;
+int[][] tiles;
+int currentCol = 0;
 
 HUD hud;
 
@@ -82,8 +92,12 @@ void setup() {
 
 void reset() {
   round = 0;
+  roundString = "";
   bulletRefillCount = 0;
   coolOffRail = 60;
+  tileXCount = 2*10;
+  tileYCount = 3*6;
+  
 
   startScreen = true;
   pauseScreen = false;
@@ -105,6 +119,7 @@ void roundGenerator() {
   incre = -10;
   fade = 200;
   round++;
+  roundString += "I ";
   transitionCounter = 0;
   enemyCount = ceil(1.5 * round);
 
@@ -136,16 +151,13 @@ void roundGenerator() {
 
   collisionDetector = new CollisionDetector();
 
-  float minX = 100000;
-  float maxX = -100000;
-  float minY = 100000;
-  float maxY = -100000;
-
   PVector octagonCentre = new PVector(mapWidth/2, mapHeight/2);
   float EIGHTH_PI = PI / 8;
   octagon = createShape();
   octagon.beginShape();
-  octagon.fill(0, 150, 60);
+  //octagon.fill(0, 150, 60);
+  octagon.strokeWeight(4);
+  octagon.noFill();
   float prevSx = octagonCentre.x + cos(-EIGHTH_PI) * octagonRadius;
   float prevSy = octagonCentre.y + sin(-EIGHTH_PI) * octagonRadius;
   for (int i=0; i<8; i++) {
@@ -157,15 +169,20 @@ void roundGenerator() {
     prevSx = sx;
     prevSy = sy;
 
-    minX = min(minX, sx);
-    maxX = max(maxX, sx);
-    minY = min(minY, sy);
-    maxY = max(maxY, sy);
+    octagonMinX = min(octagonMinX, sx);
+    octagonMaxX = max(octagonMaxX, sx);
+    octagonMinY = min(octagonMinY, sy);
+    octagonMaxY = max(octagonMaxY, sy);
   }
   octagon.endShape(CLOSE);
+  
+  tileWidth = (octagonMaxX-octagonMinX)/tileXCount;
+  tileHeight = (octagonMaxY-octagonMinY)/tileYCount;
+  
+  tiles = new int[(int)tileXCount][(int)tileYCount];
 
   Rail[] rails = new Rail[3];
-  float hexRad = (maxX - minX) /2;
+  float hexRad = (octagonMaxX - octagonMinX) /2;
   int minLengthOfRail = 600;
   int maxLengthOfRail = 700;
   for (int i = 2; i >= 0; i--) {
@@ -174,7 +191,7 @@ void roundGenerator() {
     boolean doesIntersect = false;
     do {
       do {
-        st = new PVector(random( minX, maxX), random( minY, maxY));
+        st = new PVector(random( octagonMinX, octagonMaxX), random( octagonMinY, octagonMaxY));
       } while (PVector.dist(st, octagonCentre) > hexRad);
 
       do {
@@ -197,6 +214,73 @@ void roundGenerator() {
   }
 }
 
+void updateTiles(boolean isOdd) {
+  tiles = new int[(int)tileXCount][(int)tileYCount];
+  int col;
+  do {
+    col =  (int) random(1,8);
+  } while (currentCol == col);
+  currentCol = col;
+  
+  for (int i = 0; i < tileXCount; i++){
+    for (int j = 0; j < tileYCount; j++){
+      tiles[i][j] = isOdd ? col:0;
+      isOdd = !isOdd;
+    }
+    isOdd = !isOdd;
+  }
+}
+void drawTiles() {
+  fill(230);
+  rect(0, 0, mapWidth, mapHeight);
+  for (int i = 0; i < tileXCount; i++){
+    for (int j = 0; j < tileYCount; j++){
+      switch (tiles[i][j]) {
+        case 1:
+          fill(#C0C0C0);
+        break;
+        case 2:          
+          fill(#FFD700);
+        break;
+        case 3:          
+          fill(#FF69B4);
+        break;
+        case 4:
+          fill(#9400D3);
+        break;
+        case 5:          
+          fill(#00BFFF);
+        break;
+        case 6:          
+          fill(#00FF00);
+        break;
+        case 7:          
+          fill(#ffa500);
+        break;
+        default:
+        fill(230);
+        break;
+      }
+      stroke(0);
+      strokeWeight(1);
+      rect((i*tileWidth) + octagonMinX ,(j*tileHeight) + octagonMinY,tileWidth,tileHeight);
+    }
+  }
+  
+  for (int i = 0; i < octagon.getVertexCount()-1; i++) {
+    PVector v1 = octagon.getVertex(i);
+    PVector v2 = octagon.getVertex(i+1);
+    if (i%2==0) {
+      fill(230);
+      stroke(230);
+      strokeWeight(4);
+      if (i%4==0) triangle(v1.x, v2.y, v1.x, v1.y, v2.x, v2.y);
+      else triangle(v2.x, v1.y, v1.x, v1.y, v2.x, v2.y);
+    }
+
+  }
+
+}
 boolean doesLineIntersect (Rail r1, Rail r2) {
   if (r1.m == r2.m) return false;
   float x = (r2.c - r1.c) / (r1.m - r2.m);
@@ -214,7 +298,7 @@ boolean doesLineIntersect (Rail r1, Rail r2) {
 
 void transitionScreen() {
   transitionCounter++;
-  textAlign(CENTER, CENTER);
+  textAlign(LEFT, LEFT);
   textSize(52);
   if (fade >= 200) incre = -10;
   else if (fade <= 50) incre = 10;
@@ -222,9 +306,10 @@ void transitionScreen() {
   fill(159, 20, 0, fade);
   if (transitionCounter == 0) {
   } else if (transitionCounter < 150) {
-    text("I", 30, 50);
+    
+    text(roundString, 30, 50);
   } else if (transitionCounter < 300) {
-    text("I I", 30, 50);
+    text(roundString +"I", 30, 50);
   } else {
     roundGenerator();
   }
@@ -408,16 +493,19 @@ void draw() {
     }
     contact.resolve();
   }
+  
+  if (frameCount % 60 == 0) {
+    updateTiles(frameCount%120 == 0);
+  }
 
   cameraX = player.pos.x - displayWidth/2;
   cameraY = player.pos.y - displayHeight/2;
 
   translate(-cameraX, -cameraY);
 
-  fill(230);
-  rect(0, 0, mapWidth, mapHeight);
+  drawTiles();
   shape(octagon, 0, 0);
-
+  
   if (startScreen) {
     drawStartScreen();
     return;
@@ -429,9 +517,9 @@ void draw() {
   }
 
   if (player.getLives()<=0) {
-    drawGameOverScreen();
-    getOffRail(List.of(player));
-    return;
+    //drawGameOverScreen();
+    //getOffRail(List.of(player));
+    //return;
   }
 
   for (VisibleObject visibleObject : visibleObjectList) {
