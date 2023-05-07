@@ -1,6 +1,6 @@
 class Bullet extends Particle {
   static final int BULLET_SPEED = 50;
-  static final float BULLET_MASS = 30;
+  static final float BULLET_MASS = 15;
   
   int life;
   int damage;
@@ -9,9 +9,9 @@ class Bullet extends Particle {
   Bullet(PVector pos, PVector dir, int life, int damage, PVector playerVelocity) {
     super(pos, BULLET_MASS, 10);
     
-    this.velocity = PVector.sub(dir.setMag(bulletSpeed), playerVelocity);
-    if (velocity.mag() < bulletSpeed) {
-      dir.setMag(bulletSpeed);
+    this.velocity = PVector.sub(dir.setMag(BULLET_SPEED), playerVelocity);
+    if (velocity.mag() < BULLET_SPEED) {
+      dir.setMag(BULLET_SPEED);
     }
     this.life = life;
     this.damage = damage;

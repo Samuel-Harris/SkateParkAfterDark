@@ -61,6 +61,8 @@ void setup() {
 
   mapWidth = 5 * displayWidth;
   mapHeight = 5 * displayHeight;
+  
+  cursor(loadImage("cross_hair/cross_hair.png"));
 
   backgroundMusic = new SoundFile(this, "music/background_music.wav");
   backgroundMusic.amp(0.8);
@@ -150,9 +152,9 @@ void roundGenerator() {
   visibleObjectList = new ArrayList();
   visibleObjectList.add(player);
   visibleObjectList.addAll(enemies);
-
+ //<>//
   hud = new HUD(player, 300);
-  player.resetLives(); //<>//
+  player.resetLives();
 
   collidableObjectList = new ArrayList();
   collidableObjectList.add(player);
