@@ -8,8 +8,7 @@ boolean startScreen = true,
   mouseOverStartButton = false,
   mouseOverContinueButton = false,
   mouseOverRetryButton = false,
-  mouseOverExitButton = false,
-  controlOpen = true;
+  mouseOverExitButton = false;
 
 
 int round, incre, fade, bulletRefillCount, coolOffRail;
@@ -153,7 +152,7 @@ void roundGenerator() {
     enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500, characterSpriteWidth));
   }
  //<>//
-  visibleObjectList = new ArrayList();
+  visibleObjectList = new ArrayList(); //<>//
   visibleObjectList.add(player);
   visibleObjectList.addAll(enemies);
   
@@ -483,7 +482,7 @@ void draw() {
     transitionScreen();
   }
 
-  if (!controlOpen) {
+  if (player.getMovementState() != ParticleMovementState.DEFAULT) {
     if (bulletRefillCount%reloadFrames == 0) {
       player.gainBullet();
     }
@@ -535,7 +534,7 @@ void getOnTheRail(Particle p, Rail rai) {
   p.forceAccumulator = new PVector(0, 0);
   PVector dir = p.getVelocity();
   float d = PVector.dot(dir, rai.getNormalisedVector());
-  p.state = d>0 ? ParticleMovementState.RAILLEFT: ParticleMovementState.RAILRIGHT;
+  p.state = ParticleMovementState.RAIL;
   d *= -500;
   float maxSpeed = 3000;
   float minSpeed = 1500;
@@ -569,7 +568,7 @@ void getOffRail(List<Particle> ps) {
 void getOffRail(Particle p) {
     if (p instanceof Player) {
       grindingSound.pause();
-      controlOpen = true;
+      player.setMovementState(ParticleMovementState.DEFAULT);
       float angle = atan2(cameraY+mouseY - p.pos.y, cameraX+mouseX - p.pos.x );
       PVector force = PVector.fromAngle(angle).setMag(1000);
       p.addForce(force);
@@ -580,12 +579,11 @@ void getOffRail(Particle p) {
 }
 
 void stopPlayerFromMoving() {
-  controlOpen = false;
+    player.setMovementState(ParticleMovementState.RAIL);
 }
 
 void keyPressed() {
-  if (controlOpen) {
-    switch (key) {
+  switch (key) {
     case 'w':
     case 'W':
       player.startMovingUp();
@@ -602,12 +600,8 @@ void keyPressed() {
     case 'D':
       player.startMovingRight();
       break;
-    }
-  }
-  else {
-    if (key == ' '){
+    case ' ':
       getOffRail(player);
-    }
   }
 }
 

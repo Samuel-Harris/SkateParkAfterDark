@@ -78,10 +78,6 @@ class Player extends Particle {
     float angle = atan2(cameraY+mouseY - pos.y, cameraX+mouseX - pos.x );
     minAngle = angle-QUARTER_PI/3;
     maxAngle = angle+QUARTER_PI/3;
-    //fill(255, 0, 0, 100);
-    //stroke(255, 0, 0, 100);
-    //arc(pos.x, pos.y, 200, 200, minAngle, maxAngle);
-    //ellipseMode(CENTER); 
     
     pushMatrix();
     translate(pos.x, pos.y);

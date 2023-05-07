@@ -51,11 +51,15 @@ abstract class Particle implements VisibleObject, Circle {
     return invMass;
   }
   
+  ParticleMovementState getMovementState() {
+    return state;
+  }
+  
+  void setMovementState(ParticleMovementState state) {
+    this.state = state;
+  }
+  
   void addForce(PVector force) {
     forceAccumulator.add(force);
   }
-}
-
-enum ParticleMovementState {
-  DEFAULT, RAILRIGHT, RAILLEFT;
 }
