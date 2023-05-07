@@ -204,7 +204,9 @@ void roundGenerator() {
   float hexRad = (maxX - minX) /2;
   int minLengthOfRail = 600;
   int maxLengthOfRail = 900;
+  
   float minDistanceBetweenRails = 500;
+  float minAngleDifferenceBetweenRails = 0.3;
   
   for (int i = numRails-1; i >= 0; i--) {
     PVector start;
@@ -223,13 +225,17 @@ void roundGenerator() {
       
       rails[i] = new Rail(start, end);
       for (int j = i+1; j < numRails; j++) {
-        isValid = !doesLineIntersect(rails[i], rails[j]) && getShortestDistanceBetweenRails(rails[i], rails[j]) > minDistanceBetweenRails;
+        isValid = !doesLineIntersect(rails[i], rails[j]) && getShortestDistanceBetweenRails(rails[i], rails[j]) > minDistanceBetweenRails && getAngleBetweenRails(rails[i], rails[j]) > minAngleDifferenceBetweenRails;
         if (!isValid) break;
       }
     } while (!isValid);
     collidableObjectList.add(rails[i]);
     visibleObjectList.add(rails[i]);
   }
+}
+
+float getAngleBetweenRails(Rail r1, Rail r2) {  
+  return PVector.angleBetween(new PVector(1, r1.m), new PVector(1, r2.m));
 }
 
 float getShortestDistanceBetweenRails(Rail r1, Rail r2) {
