@@ -170,7 +170,7 @@ void roundGenerator() {
   float minY = 100000;
   float maxY = -100000;
 
-  PVector octagonCentre = new PVector(mapWidth/2, mapHeight/2); //<>//
+  PVector octagonCentre = new PVector(mapWidth/2, mapHeight/2);
   float EIGHTH_PI = PI / 8;
   octagon = createShape();
   octagon.beginShape();
@@ -204,11 +204,12 @@ void roundGenerator() {
   float hexRad = (maxX - minX) /2;
   int minLengthOfRail = 600;
   int maxLengthOfRail = 900;
+  float minDistanceBetweenRails = 500;
   
   for (int i = numRails-1; i >= 0; i--) {
     PVector start;
     PVector end;
-    boolean doesIntersect = false;
+    boolean isValid = true;
     float railLength;
     do {
       do {
@@ -222,13 +223,23 @@ void roundGenerator() {
       
       rails[i] = new Rail(start, end);
       for (int j = i+1; j < numRails; j++) {
-        doesIntersect = doesLineIntersect(rails[i], rails[j]);
-        if (doesIntersect) break;
+        isValid = !doesLineIntersect(rails[i], rails[j]) && getShortestDistanceBetweenRails(rails[i], rails[j]) > minDistanceBetweenRails;
+        if (!isValid) break;
       }
-    } while (doesIntersect);
+    } while (!isValid);
     collidableObjectList.add(rails[i]);
     visibleObjectList.add(rails[i]);
   }
+}
+
+float getShortestDistanceBetweenRails(Rail r1, Rail r2) {
+  PVector r1Start = new PVector(r1.Xmin, r1.Ymin);
+  PVector r1End = new PVector(r1.Xmax, r1.Ymax);
+  
+  PVector r2Start = new PVector(r2.Xmin, r2.Ymin);
+  PVector r2End = new PVector(r2.Xmax, r2.Ymax);
+  
+  return min(min(min(r1Start.dist(r2Start), r1Start.dist(r2End)), r1End.dist(r2Start)), r1End.dist(r2Start));
 }
 
 boolean doesLineIntersect (Rail r1, Rail r2) {
