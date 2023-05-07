@@ -8,6 +8,7 @@ abstract class Particle implements VisibleObject, Circle {
   float radius;
   ParticleMovementState state;
   PVector trickForce;
+  
   public Particle(PVector pos, float mass, float radius) {
     this.pos = pos.copy();
     this.prevPos = pos.copy();

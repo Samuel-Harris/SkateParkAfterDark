@@ -51,7 +51,7 @@ int reloadFrames = 30;
 
 DeathSoundState deathSoundState;
 boolean deathSoundHasBeenPlayed;
-final int deathSoundPauseFrames = 60;
+final int deathSoundPauseFrames = 30;
 int currDeathSoundPauseFrames;
 
 void setup() {
@@ -510,6 +510,7 @@ void playDeathSound() {
           currDeathSoundPauseFrames = deathSoundPauseFrames;
           deathSoundState = DeathSoundState.NOT_PLAYING;
           backgroundMusic.loop();
+          deathSoundHasBeenPlayed = true;
         }
     }
   }
@@ -652,7 +653,7 @@ void fireBullets() {
     float angle = random(player.minAngle, player.maxAngle);
     PVector dir = PVector.fromAngle(angle).setMag(50);
     PVector pos = PVector.add(player.pos, dir);
-    Bullet b = new Bullet(pos, dir, 10, 100);
+    Bullet b = new Bullet(pos, dir, 10, 100, player.getVelocity());
     visibleObjectList.add(b);
     collidableObjectList.add(b);
   }
