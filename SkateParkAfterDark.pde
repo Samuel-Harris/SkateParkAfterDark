@@ -199,7 +199,7 @@ void roundGenerator() {
       enX = random(mapWidth);
       enY = random(mapHeight);
     }
-    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500, characterSpriteWidth)); //<>//
+    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500, characterSpriteWidth)); //<>// //<>//
   }
   
   visibleObjectList = new ArrayList(); //<>// //<>//
@@ -501,14 +501,15 @@ void drawStoryScreen() {
    
   image(introScreenImage,cameraX+width/2, cameraY+height/2, width, height);
   storyScreenCounter--;
-  if (storyScreenCounter<0) storyScreenCounter = storyScreenMaxCounter;
+  if (storyScreenCounter<=0) storyScreenCounter = storyScreenMaxCounter-1;
   textAlign(CENTER, CENTER);
   textSize(32);
   fill(239, 230, 239, storyScreenCounter % 255);
   stroke(0);
+  println(storyScreenCounter);
   text(story[story.length -1 - (int)storyScreenCounter/255], cameraX + width/2, cameraY + height/4 + storyScreenCounter % 255);
   
-  if (storyScreenCounter % 255 < 130) {
+  if (storyScreenCounter % 255 < 130 &&  (int)(storyScreenCounter/255) > 0 ) {
     fill(239, 230, 239, 255);
     text(story[story.length  - (int)storyScreenCounter/255], cameraX + width/2, cameraY + height/4 + 255 + storyScreenCounter % 255);
   }
@@ -893,24 +894,38 @@ void keyReleased() {
 }
 
 void mouseReleased() {
-  if (mouseOverReturnButton) {
-    print("hello");
-    helpScreen = mouseOverReturnButton = false;
-  } else if (mouseOverStartButton) {
-    startScreen = mouseOverStartButton = false;
-    storyScreen = true;
-    playLevelChangeSound();
-  } else if (mouseOverHelpButton) {
-    helpScreen = true;
-  } else if (mouseOverContinueButton) {
-    pauseScreen = mouseOverContinueButton = false;
-  } else if (mouseOverRetryButton) {
-    reset();
-  } else if (mouseOverExitButton) {
-    exit();
-  } else {
-    fireBullets();
+  if (helpScreen) {
+    if (mouseOverReturnButton) {
+      helpScreen = mouseOverReturnButton = false;
+    }
   }
+  else if (startScreen) {
+    if (mouseOverStartButton) {
+      startScreen = mouseOverStartButton = false;
+      storyScreen = true;
+      playLevelChangeSound();
+    } else if (mouseOverHelpButton) {
+      helpScreen = true;
+    }
+  }
+  else if (pauseScreen) {
+    if (mouseOverHelpButton) {
+      helpScreen = true;
+    } else if (mouseOverContinueButton) {
+      pauseScreen = mouseOverContinueButton = false;
+    } else if (mouseOverExitButton) {
+      exit();
+    }
+  }
+  else if (player.getLives()<=0) {
+    if (mouseOverRetryButton) {
+      reset();
+    } else if (mouseOverExitButton) {
+      exit();
+    }
+  }
+  else if (!storyScreen) fireBullets();
+
 }
 
 void fireBullets() {
