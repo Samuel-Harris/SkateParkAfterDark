@@ -14,7 +14,8 @@ boolean startScreen = true, storyScreen = false,
   mouseOverExitButton = false;
 
 
-int round, incre, fade, bulletRefillCount, coolOffRail, maxCoolOffRail;
+int round, incre, fade, bulletRefillCount, coolOffRail;
+final int maxCoolOffRail = 10;
 
 String roundString;
 
@@ -73,14 +74,14 @@ int currDeathSoundPauseFrames;
 PImage startScreenImage, introScreenImage, pauseScreenImage, helpScreenImage, gameOverScreenImage;
 
 String[] story = {"Meet Tony \"The Skater\" Johnson, a legendary roller skater who \n loves nothing more than tearing up the skate park with his trusty gun at his side.\nTony's always been a bit of a troublemaker, but he's never had \n to deal with anything like this.",
-                  "One fateful day, Tony was rolling down the street on his way to the \n skate park when he noticed a group of menacing-looking roadmen following him. \nThey were shouting all sorts of slangs at him, but Tony wasn't \n worried. He's faced down tougher foes than these guys.",
-                  "As he arrived at the skate park, Tony heard the sound of steel knives \n being sharpened behind him. He turned around to see the roadmen, \nnow brandishing their weapons and moving in for the kill. \nTony knew he had to act fast.",
-                  "With his skates on and his gun in hand, Tony began to dodge and weave \n his way through the skate park, performing tricks on rails and \n jumps to gain more bullets for his gun. The roadmen chased him, \n but Tony was too fast for them. He blasted them with his gun,\n taking them out one by one.",
-                  "Tony's heart was pounding as he realized that he was up against \n something much more sinister than he had anticipated. \n These roadmen were dangerous, and they weren't going to stop \n until they had taken him out.",
-                  "But Tony was determined to survive. He rolled through the skate park, \ndodging knives and firing his gun with deadly accuracy. \nThe roadmen fell one by one, until there were none left standing.",
-                  "As Tony breathed a sigh of relief, he knew that he had made it to the \nnext level. He was one step closer to taking down the entire gang \nand claiming his place as the undisputed king of the skate park.",
-                  "With a smirk on his face, Tony looked out over the empty skate park, \nknowing that he had just saved his own life. He may be a roller skater, \nbut he was also a gangster, and he knew how to handle himself when the going got tough. \nAnd with that, Tony rolled off into the sunset, ready to face whatever came his way.",
-                  "Press the 'W' key to begin."
+  "One fateful day, Tony was rolling down the street on his way to the \n skate park when he noticed a group of menacing-looking roadmen following him. \nThey were shouting all sorts of slangs at him, but Tony wasn't \n worried. He's faced down tougher foes than these guys.",
+  "As he arrived at the skate park, Tony heard the sound of steel knives \n being sharpened behind him. He turned around to see the roadmen, \nnow brandishing their weapons and moving in for the kill. \nTony knew he had to act fast.",
+  "With his skates on and his gun in hand, Tony began to dodge and weave \n his way through the skate park, performing tricks on rails and \n jumps to gain more bullets for his gun. The roadmen chased him, \n but Tony was too fast for them. He blasted them with his gun,\n taking them out one by one.",
+  "Tony's heart was pounding as he realized that he was up against \n something much more sinister than he had anticipated. \n These roadmen were dangerous, and they weren't going to stop \n until they had taken him out.",
+  "But Tony was determined to survive. He rolled through the skate park, \ndodging knives and firing his gun with deadly accuracy. \nThe roadmen fell one by one, until there were none left standing.",
+  "As Tony breathed a sigh of relief, he knew that he had made it to the \nnext level. He was one step closer to taking down the entire gang \nand claiming his place as the undisputed king of the skate park.",
+  "With a smirk on his face, Tony looked out over the empty skate park, \nknowing that he had just saved his own life. He may be a roller skater, \nbut he was also a gangster, and he knew how to handle himself when the going got tough. \nAnd with that, Tony rolled off into the sunset, ready to face whatever came his way.",
+  "Press the 'W' key to begin."
 };
 
 void setup() {
@@ -90,7 +91,7 @@ void setup() {
 
   mapWidth = 5 * displayWidth;
   mapHeight = 5 * displayHeight;
-  
+
   cursor(loadImage("cross_hair/cross_hair.png"));
 
   backgroundMusic = new SoundFile(this, "music/background_music.wav");
@@ -101,7 +102,7 @@ void setup() {
 
   shotgunSound = new SoundFile(this, "player_sounds/shotgun_fire.wav");
   shotgunSound.amp(0.2);
-  
+
   shotgunReloadSound = new SoundFile(this, "player_sounds/shotgun_reload.wav");
   shotgunReloadSound.amp(0.4);
   shotgunReloadSound.rate(1.2);
@@ -111,13 +112,13 @@ void setup() {
   for (int i=0; i<4; i++) {
     levelChangeSounds[i] = new SoundFile(this, "roadman_sounds/level_change_" + i + ".wav");
   }
-  
+
   shotgunOutOfAmmoSound = new SoundFile(this, "player_sounds/out_of_ammo.wav");
-  
+
   stabSound = new SoundFile(this, "player_sounds/stab.wav");
-  
+
   deathSound = new SoundFile(this, "player_sounds/death.wav");
-  
+
   deathSoundState = DeathSoundState.NOT_PLAYING;
 
   introScreenImage = loadImage("background/intro.jpeg");
@@ -136,7 +137,6 @@ void reset() {
   bulletRefillCount = 0;
   storyScreenMaxCounter = 255*story.length;
   storyScreenCounter = storyScreenMaxCounter;
-  maxCoolOffRail = 30;
   coolOffRail = maxCoolOffRail;
   tileXCount = 2*10;
   tileYCount = 3*6;
@@ -157,7 +157,7 @@ void reset() {
   player = new Player(new PVector(mapWidth/2, mapHeight/2), skatingSound, stabSound, characterSpriteWidth);
 
   roundGenerator();
-  
+
   deathSoundHasBeenPlayed = false;
   deathSoundState = DeathSoundState.NOT_PLAYING;
   if (deathSound.isPlaying()) {
@@ -168,11 +168,11 @@ void reset() {
 void playLevelChangeSound() {
   if (!IntStream.range(0, numLevelChangeSounds).anyMatch(i -> levelChangeSounds[i].isPlaying())) {
     int levelChangeSoundNum;
-    
+
     do {
       levelChangeSoundNum = int(random(numLevelChangeSounds));
     } while (lastLevelChangeSound == levelChangeSoundNum);
-    
+
     levelChangeSounds[levelChangeSoundNum].play();
     lastLevelChangeSound = levelChangeSoundNum;
   }
@@ -201,11 +201,11 @@ void roundGenerator() {
     }
     enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500, characterSpriteWidth)); //<>// //<>//
   }
-  
+
   visibleObjectList = new ArrayList();
   visibleObjectList.add(player);
   visibleObjectList.addAll(enemies);
-  
+
   hud = new HUD(player, 300);
   player.resetLives();
 
@@ -244,7 +244,7 @@ void roundGenerator() {
   tileHeight = (octagonMaxY-octagonMinY)/tileYCount;
 
   tiles = new int[(int)tileXCount][(int)tileYCount];
-  octStart = new PVector(octagonMinX,octagonMinY);
+  octStart = new PVector(octagonMinX, octagonMinY);
   int distanceFromSide = 100;
   octagonMinX += distanceFromSide;
   octagonMaxX -= distanceFromSide;
@@ -258,10 +258,10 @@ void roundGenerator() {
   float hexRad = (octagonMaxX - octagonMinX) /2;
   int minLengthOfRail = 600;
   int maxLengthOfRail = 900;
-  
+
   float minDistanceBetweenRails = 500;
   float minAngleDifferenceBetweenRails = 0.3;
-  
+
   for (int i = numRails-1; i >= 0; i--) {
     PVector start;
     PVector end;
@@ -272,11 +272,11 @@ void roundGenerator() {
         do {
           start = new PVector(random(octagonMinX, octagonMaxX), random(octagonMinY, octagonMaxY));
         } while (PVector.dist(start, octagonCentre) > hexRad);
-        
-        end = new PVector(random(octagonMinX, octagonMaxX),random(octagonMinY, octagonMaxY));
+
+        end = new PVector(random(octagonMinX, octagonMaxX), random(octagonMinY, octagonMaxY));
         railLength = start.dist(end);
-      }  while (PVector.dist(end, octagonCentre) > hexRad || railLength < minLengthOfRail || railLength > maxLengthOfRail);
-      
+      } while (PVector.dist(end, octagonCentre) > hexRad || railLength < minLengthOfRail || railLength > maxLengthOfRail);
+
       rails[i] = new Rail(start, end);
       for (int j = i+1; j < numRails; j++) {
         isValid = !doesLineIntersect(rails[i], rails[j]) && getShortestDistanceBetweenRails(rails[i], rails[j]) > minDistanceBetweenRails && getAngleBetweenRails(rails[i], rails[j]) > minAngleDifferenceBetweenRails;
@@ -296,10 +296,10 @@ float getAngleBetweenRails(Rail r1, Rail r2) {
 float getShortestDistanceBetweenRails(Rail r1, Rail r2) {
   PVector r1Start = new PVector(r1.Xmin, r1.Ymin);
   PVector r1End = new PVector(r1.Xmax, r1.Ymax);
-  
+
   PVector r2Start = new PVector(r2.Xmin, r2.Ymin);
   PVector r2End = new PVector(r2.Xmax, r2.Ymax);
-  
+
   return min(min(min(r1Start.dist(r2Start), r1Start.dist(r2End)), r1End.dist(r2Start)), r1End.dist(r2Start));
 }
 
@@ -307,12 +307,12 @@ void updateTiles(boolean isOdd) {
   tiles = new int[(int)tileXCount][(int)tileYCount];
   int col;
   do {
-    col =  (int) random(1,8);
+    col =  (int) random(1, 8);
   } while (currentCol == col);
   currentCol = col;
 
-  for (int i = 0; i < tileXCount; i++){
-    for (int j = 0; j < tileYCount; j++){
+  for (int i = 0; i < tileXCount; i++) {
+    for (int j = 0; j < tileYCount; j++) {
       tiles[i][j] = isOdd ? col:0;
       isOdd = !isOdd;
     }
@@ -322,37 +322,37 @@ void updateTiles(boolean isOdd) {
 void drawTiles() {
   fill(230);
   rect(0, 0, mapWidth, mapHeight);
-  for (int i = 0; i < tileXCount; i++){
-    for (int j = 0; j < tileYCount; j++){
+  for (int i = 0; i < tileXCount; i++) {
+    for (int j = 0; j < tileYCount; j++) {
       switch (tiles[i][j]) {
-        case 1:
-          fill(#C0C0C0);
+      case 1:
+        fill(#C0C0C0);
         break;
-        case 2:
-          fill(#FFD700);
+      case 2:
+        fill(#FFD700);
         break;
-        case 3:
-          fill(#FF69B4);
+      case 3:
+        fill(#FF69B4);
         break;
-        case 4:
-          fill(#9400D3);
+      case 4:
+        fill(#9400D3);
         break;
-        case 5:
-          fill(#00BFFF);
+      case 5:
+        fill(#00BFFF);
         break;
-        case 6:
-          fill(#00FF00);
+      case 6:
+        fill(#00FF00);
         break;
-        case 7:
-          fill(#ffa500);
+      case 7:
+        fill(#ffa500);
         break;
-        default:
+      default:
         fill(230);
         break;
       }
       stroke(0);
       strokeWeight(1);
-      rect((i*tileWidth) + octStart.x ,(j*tileHeight) + octStart.y,tileWidth,tileHeight);
+      rect((i*tileWidth) + octStart.x, (j*tileHeight) + octStart.y, tileWidth, tileHeight);
     }
   }
 
@@ -366,9 +366,7 @@ void drawTiles() {
       if (i%4==0) triangle(v1.x, v2.y, v1.x, v1.y, v2.x, v2.y);
       else triangle(v2.x, v1.y, v1.x, v1.y, v2.x, v2.y);
     }
-
   }
-
 }
 boolean doesLineIntersect (Rail r1, Rail r2) {
   if (r1.m == r2.m) return false;
@@ -387,7 +385,7 @@ boolean doesLineIntersect (Rail r1, Rail r2) {
 
 void transitionScreen() {
   int transitionCounterMax = 300;
-  
+
   transitionCounter++;
   textAlign(LEFT, LEFT);
   textSize(52);
@@ -404,7 +402,7 @@ void transitionScreen() {
   } else {
     roundGenerator();
   }
-  
+
   if (transitionCounter >= player.getBulletCount() * transitionCounterMax / player.getMaxBullets()) {
     player.gainBullet();
   }
@@ -499,7 +497,7 @@ void drawHelpScreen() {
 
 void drawStoryScreen() {
 
-  image(introScreenImage,cameraX+width/2, cameraY+height/2, width, height);
+  image(introScreenImage, cameraX+width/2, cameraY+height/2, width, height);
   storyScreenCounter--;
   if (storyScreenCounter<=0) storyScreenCounter = storyScreenMaxCounter-1;
   textAlign(CENTER, CENTER);
@@ -515,7 +513,6 @@ void drawStoryScreen() {
   }
 
   text(story[8], cameraX + width/2, cameraY + 9*height/10);
-
 }
 
 void drawPauseScreen() {
@@ -642,7 +639,7 @@ void draw() {
       }
     }
   }
-  
+
   List<Particle> contactListWithParticleCollidingWithRails1 = contactList.stream()
     .filter(e -> e.collidableA instanceof Rail && e.collidableB instanceof Particle)
     .map(e -> (Particle)e.collidableB)
@@ -659,11 +656,11 @@ void draw() {
     .filter(e -> !contactListWithParticleCollidingWithRails1.contains(e))
     .collect(Collectors.toList());
   getOffRail(esfce);
-  
-  if (coolOffRail < maxCoolOffRail){
+
+  if (coolOffRail < maxCoolOffRail) {
     if (--coolOffRail == 0) coolOffRail = maxCoolOffRail;
   }
-  
+
   for (Contact contact : contactList) {
     if (contact.collidableA instanceof Bullet && contact.collidableB instanceof Bullet) continue;
     if (contact.collidableA instanceof Bullet && contact.collidableB instanceof Player) continue;
@@ -759,29 +756,29 @@ void playDeathSound() {
     currDeathSoundPauseFrames = deathSoundPauseFrames;
   } else {
     switch (deathSoundState) {
-      case BEGINNING_PAUSE:
-        if (currDeathSoundPauseFrames > 0) {
-          currDeathSoundPauseFrames -= 1;
-        } else {
-          currDeathSoundPauseFrames = deathSoundPauseFrames;
-          deathSoundState = DeathSoundState.DEATH_SOUND;
-          deathSound.play();
-        }
-        break;
-      case DEATH_SOUND:
-        if (!deathSound.isPlaying()) {
-          deathSoundState = DeathSoundState.END_PAUSE;
-        }
-        break;
-      case END_PAUSE:
-        if (currDeathSoundPauseFrames > 0) {
-          currDeathSoundPauseFrames -= 1;
-        } else {
-          currDeathSoundPauseFrames = deathSoundPauseFrames;
-          deathSoundState = DeathSoundState.NOT_PLAYING;
-          backgroundMusic.loop();
-          deathSoundHasBeenPlayed = true;
-        }
+    case BEGINNING_PAUSE:
+      if (currDeathSoundPauseFrames > 0) {
+        currDeathSoundPauseFrames -= 1;
+      } else {
+        currDeathSoundPauseFrames = deathSoundPauseFrames;
+        deathSoundState = DeathSoundState.DEATH_SOUND;
+        deathSound.play();
+      }
+      break;
+    case DEATH_SOUND:
+      if (!deathSound.isPlaying()) {
+        deathSoundState = DeathSoundState.END_PAUSE;
+      }
+      break;
+    case END_PAUSE:
+      if (currDeathSoundPauseFrames > 0) {
+        currDeathSoundPauseFrames -= 1;
+      } else {
+        currDeathSoundPauseFrames = deathSoundPauseFrames;
+        deathSoundState = DeathSoundState.NOT_PLAYING;
+        backgroundMusic.loop();
+        deathSoundHasBeenPlayed = true;
+      }
     }
   }
 }
@@ -826,43 +823,43 @@ void getOffRail(List<Particle> ps) {
 }
 
 void getOffRail(Particle p) {
-    if (p instanceof Player) {
-      grindingSound.pause();
-      player.setMovementState(ParticleMovementState.DEFAULT);
-      float angle = atan2(cameraY+mouseY - p.pos.y, cameraX+mouseX - p.pos.x );
-      PVector force = PVector.fromAngle(angle).setMag(1000);
-      p.addForce(force);
-      coolOffRail = maxCoolOffRail-1;
-    }
-    p.state = ParticleMovementState.DEFAULT;
-    p.trickForce = null;
+  if (p instanceof Player) {
+    grindingSound.pause();
+    player.setMovementState(ParticleMovementState.DEFAULT);
+    float angle = atan2(cameraY+mouseY - p.pos.y, cameraX+mouseX - p.pos.x );
+    PVector force = PVector.fromAngle(angle).setMag(1000);
+    p.addForce(force);
+    coolOffRail = maxCoolOffRail-1;
+  }
+  p.state = ParticleMovementState.DEFAULT;
+  p.trickForce = null;
 }
 
 void stopPlayerFromMoving() {
-    player.setMovementState(ParticleMovementState.RAIL);
+  player.setMovementState(ParticleMovementState.RAIL);
 }
 
 void keyPressed() {
   switch (key) {
-    case 'w':
-    case 'W':
-      if (storyScreen) storyScreen = false;
-      player.startMovingUp();
-      break;
-    case 'a':
-    case 'A':
-      player.startMovingLeft();
-      break;
-    case 's':
-    case 'S':
-      player.startMovingDown();
-      break;
-    case 'd':
-    case 'D':
-      player.startMovingRight();
-      break;
-    case ' ':
-      getOffRail(player);
+  case 'w':
+  case 'W':
+    if (storyScreen) storyScreen = false;
+    player.startMovingUp();
+    break;
+  case 'a':
+  case 'A':
+    player.startMovingLeft();
+    break;
+  case 's':
+  case 'S':
+    player.startMovingDown();
+    break;
+  case 'd':
+  case 'D':
+    player.startMovingRight();
+    break;
+  case ' ':
+    getOffRail(player);
   }
 }
 
@@ -898,8 +895,7 @@ void mouseReleased() {
     if (mouseOverReturnButton) {
       helpScreen = mouseOverReturnButton = false;
     }
-  }
-  else if (startScreen) {
+  } else if (startScreen) {
     if (mouseOverStartButton) {
       startScreen = mouseOverStartButton = false;
       storyScreen = true;
@@ -907,8 +903,7 @@ void mouseReleased() {
     } else if (mouseOverHelpButton) {
       helpScreen = true;
     }
-  }
-  else if (pauseScreen) {
+  } else if (pauseScreen) {
     if (mouseOverHelpButton) {
       helpScreen = true;
     } else if (mouseOverContinueButton) {
@@ -916,16 +911,13 @@ void mouseReleased() {
     } else if (mouseOverExitButton) {
       exit();
     }
-  }
-  else if (player.getLives()<=0) {
+  } else if (player.getLives()<=0) {
     if (mouseOverRetryButton) {
       reset();
     } else if (mouseOverExitButton) {
       exit();
     }
-  }
-  else if (!storyScreen) fireBullets();
-
+  } else if (!storyScreen) fireBullets();
 }
 
 void fireBullets() {
