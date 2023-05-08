@@ -199,7 +199,7 @@ void roundGenerator() {
     enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500, characterSpriteWidth));
   }
   
-  visibleObjectList = new ArrayList(); //<>//
+  visibleObjectList = new ArrayList(); //<>// //<>//
   visibleObjectList.add(player);
   visibleObjectList.addAll(enemies);
   
@@ -243,11 +243,6 @@ void roundGenerator() {
   tiles = new int[(int)tileXCount][(int)tileYCount];
 
   int distanceFromSide = 100;
-  //minX += distanceFromSide;
-  //maxX -= distanceFromSide;
-  //minY += distanceFromSide;
-  //maxY -= distanceFromSide;
-  
   octagonMinX += distanceFromSide;
   octagonMaxX -= distanceFromSide;
   octagonMinY += distanceFromSide;
