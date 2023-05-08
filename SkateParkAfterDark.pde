@@ -283,19 +283,6 @@ void roundGenerator() {
   }
 }
 
-float getAngleBetweenRails(Rail r1, Rail r2) {  
-  return PVector.angleBetween(new PVector(1, r1.m), new PVector(1, r2.m));
-}
-
-float getShortestDistanceBetweenRails(Rail r1, Rail r2) {
-  PVector r1Start = new PVector(r1.Xmin, r1.Ymin);
-  PVector r1End = new PVector(r1.Xmax, r1.Ymax);
-  
-  PVector r2Start = new PVector(r2.Xmin, r2.Ymin);
-  PVector r2End = new PVector(r2.Xmax, r2.Ymax);
-  
-  return min(min(min(r1Start.dist(r2Start), r1Start.dist(r2End)), r1End.dist(r2Start)), r1End.dist(r2Start));
-}
 
 float getAngleBetweenRails(Rail r1, Rail r2) {  
   return PVector.angleBetween(new PVector(1, r1.m), new PVector(1, r2.m));
