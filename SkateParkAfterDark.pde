@@ -11,8 +11,7 @@ boolean startScreen = true, storyScreen = false,
   mouseOverReturnButton = false,
   mouseOverContinueButton = false,
   mouseOverRetryButton = false,
-  mouseOverExitButton = false,
-  controlOpen = true;
+  mouseOverExitButton = false;
 
 
 int round, incre, fade, bulletRefillCount, coolOffRail, maxCoolOffRail;
@@ -57,10 +56,17 @@ SoundFile shotgunReloadSound;
 SoundFile shotgunOutOfAmmoSound;
 SoundFile stabSound;
 SoundFile grindingSound;
+SoundFile deathSound;
 final int numLevelChangeSounds = 4;
+int lastLevelChangeSound = -1;
 SoundFile[] levelChangeSounds = new SoundFile[numLevelChangeSounds];
 
-int reloadFrames = 30; 
+int reloadFrames = 30;
+
+DeathSoundState deathSoundState;
+boolean deathSoundHasBeenPlayed;
+final int deathSoundPauseFrames = 30;
+int currDeathSoundPauseFrames;
 
 PImage startScreenImage, introScreenImage, pauseScreenImage, helpScreenImage, gameOverScreenImage;
 
@@ -82,6 +88,8 @@ void setup() {
 
   mapWidth = 5 * displayWidth;
   mapHeight = 5 * displayHeight;
+  
+  cursor(loadImage("cross_hair/cross_hair.png"));
 
   backgroundMusic = new SoundFile(this, "music/background_music.wav");
   backgroundMusic.amp(0.8);
@@ -93,7 +101,8 @@ void setup() {
   shotgunSound.amp(0.2);
   
   shotgunReloadSound = new SoundFile(this, "player_sounds/shotgun_reload.wav");
-  shotgunReloadSound.amp(0.2);
+  shotgunReloadSound.amp(0.4);
+  shotgunReloadSound.rate(1.2);
 
   grindingSound = new SoundFile(this, "player_sounds/grind.wav");
 
@@ -104,6 +113,10 @@ void setup() {
   shotgunOutOfAmmoSound = new SoundFile(this, "player_sounds/out_of_ammo.wav");
   
   stabSound = new SoundFile(this, "player_sounds/stab.wav");
+  
+  deathSound = new SoundFile(this, "player_sounds/death.wav");
+  
+  deathSoundState = DeathSoundState.NOT_PLAYING;
   
   introScreenImage = loadImage("background/intro.jpeg");
   startScreenImage = loadImage("background/start.jpeg");
@@ -141,12 +154,29 @@ void reset() {
   player = new Player(new PVector(mapWidth/2, mapHeight/2), skatingSound, stabSound, characterSpriteWidth);
 
   roundGenerator();
+  
+  deathSoundHasBeenPlayed = false;
+  deathSoundState = DeathSoundState.NOT_PLAYING;
+  if (deathSound.isPlaying()) {
+    deathSound.stop();
+  }
+}
+
+void playLevelChangeSound() {
+  if (!IntStream.range(0, numLevelChangeSounds).anyMatch(i -> levelChangeSounds[i].isPlaying())) {
+    int levelChangeSoundNum;
+    
+    do {
+      levelChangeSoundNum = int(random(numLevelChangeSounds));
+    } while (lastLevelChangeSound == levelChangeSoundNum);
+    
+    levelChangeSounds[levelChangeSoundNum].play();
+    lastLevelChangeSound = levelChangeSoundNum;
+  }
 }
 
 void roundGenerator() {
-  if (!IntStream.range(0, numLevelChangeSounds).anyMatch(i -> levelChangeSounds[i].isPlaying())) {
-    levelChangeSounds[int(random(numLevelChangeSounds))].play();
-  }
+  playLevelChangeSound();
 
   incre = -10;
   fade = 200;
@@ -168,12 +198,11 @@ void roundGenerator() {
     }
     enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500, characterSpriteWidth));
   }
-
-
-  visibleObjectList = new ArrayList();
+  
+  visibleObjectList = new ArrayList(); //<>//
   visibleObjectList.add(player);
   visibleObjectList.addAll(enemies);
-
+  
   hud = new HUD(player, 300);
   player.resetLives();
 
@@ -207,43 +236,79 @@ void roundGenerator() {
     octagonMaxY = max(octagonMaxY, sy);
   }
   octagon.endShape(CLOSE);
-  
+    
   tileWidth = (octagonMaxX-octagonMinX)/tileXCount;
   tileHeight = (octagonMaxY-octagonMinY)/tileYCount;
   
   tiles = new int[(int)tileXCount][(int)tileYCount];
 
-  Rail[] rails = new Rail[3];
+  int distanceFromSide = 100;
+  minX += distanceFromSide;
+  maxX -= distanceFromSide;
+  minY += distanceFromSide;
+  maxY -= distanceFromSide;
+
+  int numRails = 4;
+  Rail[] rails = new Rail[numRails];
   float hexRad = (octagonMaxX - octagonMinX) /2;
   int minLengthOfRail = 600;
-  int maxLengthOfRail = 700;
-  for (int i = 2; i >= 0; i--) {
-    PVector st;
-    PVector en;
-    boolean doesIntersect = false;
+  int maxLengthOfRail = 900;
+  
+  float minDistanceBetweenRails = 500;
+  float minAngleDifferenceBetweenRails = 0.3;
+  
+  for (int i = numRails-1; i >= 0; i--) {
+    PVector start;
+    PVector end;
+    boolean isValid = true;
+    float railLength;
     do {
       do {
-        st = new PVector(random( octagonMinX, octagonMaxX), random( octagonMinY, octagonMaxY));
-      } while (PVector.dist(st, octagonCentre) > hexRad);
-
-      do {
-        float rad = random(minLengthOfRail, maxLengthOfRail);
-        float Xmin = st.x - rad;
-        float Xmax = st.x + rad;
-        float Ymin = st.y - rad;
-        float Ymax = st.y + rad;
-        en = new PVector(random( Xmin, Xmax),random( Ymin, Ymax));
-      }  while (PVector.dist(en, octagonCentre) > hexRad);
+        do {
+          start = new PVector(random(minX, maxX), random(minY, maxY));
+        } while (PVector.dist(start, octagonCentre) > hexRad);
+        
+        end = new PVector(random(minX, maxX),random(minY, maxY));
+        railLength = start.dist(end);
+      }  while (PVector.dist(end, octagonCentre) > hexRad || railLength < minLengthOfRail || railLength > maxLengthOfRail);
       
-      rails[i] = new Rail(st,en);
-      for (int j = i+1; j < 3; j++) {
-        doesIntersect = doesLineIntersect(rails[i], rails[j]);
-        if (doesIntersect) break;
+      rails[i] = new Rail(start, end);
+      for (int j = i+1; j < numRails; j++) {
+        isValid = !doesLineIntersect(rails[i], rails[j]) && getShortestDistanceBetweenRails(rails[i], rails[j]) > minDistanceBetweenRails && getAngleBetweenRails(rails[i], rails[j]) > minAngleDifferenceBetweenRails;
+        if (!isValid) break;
       }
-    } while (doesIntersect);
+    } while (!isValid);
     collidableObjectList.add(rails[i]);
     visibleObjectList.add(rails[i]);
   }
+}
+
+float getAngleBetweenRails(Rail r1, Rail r2) {  
+  return PVector.angleBetween(new PVector(1, r1.m), new PVector(1, r2.m));
+}
+
+float getShortestDistanceBetweenRails(Rail r1, Rail r2) {
+  PVector r1Start = new PVector(r1.Xmin, r1.Ymin);
+  PVector r1End = new PVector(r1.Xmax, r1.Ymax);
+  
+  PVector r2Start = new PVector(r2.Xmin, r2.Ymin);
+  PVector r2End = new PVector(r2.Xmax, r2.Ymax);
+  
+  return min(min(min(r1Start.dist(r2Start), r1Start.dist(r2End)), r1End.dist(r2Start)), r1End.dist(r2Start));
+}
+
+float getAngleBetweenRails(Rail r1, Rail r2) {  
+  return PVector.angleBetween(new PVector(1, r1.m), new PVector(1, r2.m));
+}
+
+float getShortestDistanceBetweenRails(Rail r1, Rail r2) {
+  PVector r1Start = new PVector(r1.Xmin, r1.Ymin);
+  PVector r1End = new PVector(r1.Xmax, r1.Ymax);
+  
+  PVector r2Start = new PVector(r2.Xmin, r2.Ymin);
+  PVector r2End = new PVector(r2.Xmax, r2.Ymax);
+  
+  return min(min(min(r1Start.dist(r2Start), r1Start.dist(r2End)), r1End.dist(r2Start)), r1End.dist(r2Start));
 }
 
 void updateTiles(boolean isOdd) {
@@ -329,6 +394,8 @@ boolean doesLineIntersect (Rail r1, Rail r2) {
 }
 
 void transitionScreen() {
+  int transitionCounterMax = 300;
+  
   transitionCounter++;
   textAlign(LEFT, LEFT);
   textSize(52);
@@ -344,6 +411,10 @@ void transitionScreen() {
     text(roundString +"I", 30, 50);
   } else {
     roundGenerator();
+  }
+  
+  if (transitionCounter >= player.getBulletCount() * transitionCounterMax / player.getMaxBullets()) {
+    player.gainBullet();
   }
 }
 
@@ -553,7 +624,7 @@ void drawGameOverScreen() {
 }
 
 void draw() {
-  if (!backgroundMusic.isPlaying()) {
+  if (!backgroundMusic.isPlaying() && deathSoundState == DeathSoundState.NOT_PLAYING) {
     backgroundMusic.loop();
   }
 
@@ -662,6 +733,9 @@ void draw() {
 
   if (player.getLives()<=0) {
     drawGameOverScreen();
+    if (!deathSoundHasBeenPlayed) {
+      playDeathSound();
+    }
     getOffRail(List.of(player));
     return;
   }
@@ -676,15 +750,48 @@ void draw() {
     transitionScreen();
   }
 
-  if (!controlOpen) {
+  if (player.getMovementState() != ParticleMovementState.DEFAULT) {
     if (bulletRefillCount%reloadFrames == 0) {
-      shotgunReloadSound.play();
       player.gainBullet();
     }
     bulletRefillCount++;
   }
 
   hud.draw();
+}
+
+void playDeathSound() {
+  if (backgroundMusic.isPlaying()) {  // player just died, start death sound sequence
+    backgroundMusic.pause();
+    deathSoundState = DeathSoundState.BEGINNING_PAUSE;
+    currDeathSoundPauseFrames = deathSoundPauseFrames;
+  } else {
+    switch (deathSoundState) {
+      case BEGINNING_PAUSE:
+        if (currDeathSoundPauseFrames > 0) {
+          currDeathSoundPauseFrames -= 1;
+        } else {
+          currDeathSoundPauseFrames = deathSoundPauseFrames;
+          deathSoundState = DeathSoundState.DEATH_SOUND;
+          deathSound.play();
+        }
+        break;
+      case DEATH_SOUND:
+        if (!deathSound.isPlaying()) {
+          deathSoundState = DeathSoundState.END_PAUSE;
+        }
+        break;
+      case END_PAUSE:
+        if (currDeathSoundPauseFrames > 0) {
+          currDeathSoundPauseFrames -= 1;
+        } else {
+          currDeathSoundPauseFrames = deathSoundPauseFrames;
+          deathSoundState = DeathSoundState.NOT_PLAYING;
+          backgroundMusic.loop();
+          deathSoundHasBeenPlayed = true;
+        }
+    }
+  }
 }
 
 void getOnTheRail(Particle p, Rail rai) {
@@ -695,7 +802,7 @@ void getOnTheRail(Particle p, Rail rai) {
   p.forceAccumulator = new PVector(0, 0);
   PVector dir = p.getVelocity();
   float d = PVector.dot(dir, rai.getNormalisedVector());
-  p.state = d>0 ? ParticleMovementState.RAILLEFT: ParticleMovementState.RAILRIGHT;
+  p.state = ParticleMovementState.RAIL;
   d *= -500;
   float maxSpeed = 3000;
   float minSpeed = 1500;
@@ -729,7 +836,7 @@ void getOffRail(List<Particle> ps) {
 void getOffRail(Particle p) {
     if (p instanceof Player) {
       grindingSound.pause();
-      controlOpen = true;
+      player.setMovementState(ParticleMovementState.DEFAULT);
       float angle = atan2(cameraY+mouseY - p.pos.y, cameraX+mouseX - p.pos.x );
       PVector force = PVector.fromAngle(angle).setMag(1000);
       p.addForce(force);
@@ -740,12 +847,11 @@ void getOffRail(Particle p) {
 }
 
 void stopPlayerFromMoving() {
-  controlOpen = false;
+    player.setMovementState(ParticleMovementState.RAIL);
 }
 
 void keyPressed() {
-  if (controlOpen) {
-    switch (key) {
+  switch (key) {
     case 'w':
     case 'W':
       if (storyScreen) storyScreen = false;
@@ -763,14 +869,8 @@ void keyPressed() {
     case 'D':
       player.startMovingRight();
       break;
-    }
-  }
-  else {
-    if (key == ' '){
-      print("hello");
-      
+    case ' ':
       getOffRail(player);
-    }
   }
 }
 
@@ -808,7 +908,7 @@ void mouseReleased() {
   } else if (mouseOverStartButton) {
     startScreen = mouseOverStartButton = false;
     storyScreen = true;
-    levelChangeSounds[int(random(numLevelChangeSounds))].play();
+    playLevelChangeSound();
   } else if (mouseOverHelpButton) {
     helpScreen = true;
   } else if (mouseOverContinueButton) {
@@ -833,7 +933,7 @@ void fireBullets() {
     float angle = random(player.minAngle, player.maxAngle);
     PVector dir = PVector.fromAngle(angle).setMag(50);
     PVector pos = PVector.add(player.pos, dir);
-    Bullet b = new Bullet(pos, dir, 10, 100);
+    Bullet b = new Bullet(pos, dir, 10, 100, player.getVelocity());
     visibleObjectList.add(b);
     collidableObjectList.add(b);
   }

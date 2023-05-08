@@ -1,0 +1,3 @@
+enum ParticleMovementState {
+  DEFAULT, RAIL;
+}

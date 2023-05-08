@@ -56,14 +56,13 @@ class HUD implements VisibleObject {
         for (int i = livesLeft; i < player.getMaxLives(); i++) {
           image(heartSprites[i < heartIndex ? 0 : i == heartIndex ? decwea : (numHeartSprites - 1)], heartXPositions[i], height - heartWidth);
         }
-        if (decwea == 0) { //<>// //<>//
+        if (decwea == 0) { //<>//
           numRevivedHearts++;
           this.reviveCounter = transitionCounterFrames;
         }
         reviveCounter--;
       }
     }
-    
     
     fill(255);
     textSize(104); 
