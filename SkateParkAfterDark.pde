@@ -3,22 +3,37 @@ import java.util.Optional;
 import processing.sound.SoundFile;
 import java.util.stream.IntStream;
 
-boolean startScreen = true,
+boolean startScreen = true, storyScreen = false,
   pauseScreen = false,
+  helpScreen = false,
   mouseOverStartButton = false,
+  mouseOverHelpButton = false,
+  mouseOverReturnButton = false,
   mouseOverContinueButton = false,
   mouseOverRetryButton = false,
   mouseOverExitButton = false;
 
 
-int round, incre, fade, bulletRefillCount, coolOffRail;
+int round, incre, fade, bulletRefillCount, coolOffRail, maxCoolOffRail;
+
+String roundString;
 
 float mapWidth,
   mapHeight,
   cameraX,
   cameraY,
   transitionCounter,
-  octagonRadius = 1500;
+  storyScreenCounter,
+  storyScreenMaxCounter,
+  octagonRadius = 1500,
+  octagonMinX = 100000,
+  octagonMaxX = -100000,
+  octagonMinY = 100000,
+  octagonMaxY = -100000,
+  tileXCount, tileYCount,
+  tileWidth, tileHeight;
+
+PVector octStart;
 
 int characterSpriteWidth = 200;
 Player player;
@@ -31,6 +46,8 @@ CollisionDetector collisionDetector;
 List<Enemy> enemies;
 int enemyCount;
 PShape octagon;
+int[][] tiles;
+int currentCol = 0;
 
 HUD hud;
 
@@ -52,6 +69,19 @@ DeathSoundState deathSoundState;
 boolean deathSoundHasBeenPlayed;
 final int deathSoundPauseFrames = 30;
 int currDeathSoundPauseFrames;
+
+PImage startScreenImage, introScreenImage, pauseScreenImage, helpScreenImage, gameOverScreenImage;
+
+String[] story = {"Meet Tony \"The Skater\" Johnson, a legendary roller skater who \n loves nothing more than tearing up the skate park with his trusty gun at his side.\nTony's always been a bit of a troublemaker, but he's never had \n to deal with anything like this.",
+                  "One fateful day, Tony was rolling down the street on his way to the \n skate park when he noticed a group of menacing-looking roadmen following him. \nThey were shouting all sorts of slangs at him, but Tony wasn't \n worried. He's faced down tougher foes than these guys.",
+                  "As he arrived at the skate park, Tony heard the sound of steel knives \n being sharpened behind him. He turned around to see the roadmen, \nnow brandishing their weapons and moving in for the kill. \nTony knew he had to act fast.",
+                  "With his skates on and his gun in hand, Tony began to dodge and weave \n his way through the skate park, performing tricks on rails and \n jumps to gain more bullets for his gun. The roadmen chased him, \n but Tony was too fast for them. He blasted them with his gun,\n taking them out one by one.",
+                  "Tony's heart was pounding as he realized that he was up against \n something much more sinister than he had anticipated. \n These roadmen were dangerous, and they weren't going to stop \n until they had taken him out.",
+                  "But Tony was determined to survive. He rolled through the skate park, \ndodging knives and firing his gun with deadly accuracy. \nThe roadmen fell one by one, until there were none left standing.",
+                  "As Tony breathed a sigh of relief, he knew that he had made it to the \nnext level. He was one step closer to taking down the entire gang \nand claiming his place as the undisputed king of the skate park.",
+                  "With a smirk on his face, Tony looked out over the empty skate park, \nknowing that he had just saved his own life. He may be a roller skater, \nbut he was also a gangster, and he knew how to handle himself when the going got tough. \nAnd with that, Tony rolled off into the sunset, ready to face whatever came his way.",
+                  "Press the 'W' key to begin."
+};
 
 void setup() {
   imageMode(CENTER);
@@ -90,13 +120,27 @@ void setup() {
   
   deathSoundState = DeathSoundState.NOT_PLAYING;
 
+  introScreenImage = loadImage("background/intro.jpeg");
+  startScreenImage = loadImage("background/start.jpeg");
+  pauseScreenImage = loadImage("background/paused.jpeg");
+  helpScreenImage = loadImage("background/control.jpeg");
+  gameOverScreenImage = loadImage("background/end.jpeg");
+  size(width, height);
+
   reset();
 }
 
 void reset() {
   round = 0;
+  roundString = "";
   bulletRefillCount = 0;
-  coolOffRail = 60;
+  storyScreenMaxCounter = 255*story.length;
+  storyScreenCounter = storyScreenMaxCounter;
+  maxCoolOffRail = 30;
+  coolOffRail = maxCoolOffRail;
+  tileXCount = 2*10;
+  tileYCount = 3*6;
+
 
   startScreen = true;
   pauseScreen = false;
@@ -104,6 +148,11 @@ void reset() {
   mouseOverContinueButton = false;
   mouseOverRetryButton = false;
   mouseOverExitButton = false;
+
+  storyScreen = false;
+  helpScreen = false;
+  mouseOverHelpButton = false;
+  mouseOverReturnButton = false;
 
   player = new Player(new PVector(mapWidth/2, mapHeight/2), skatingSound, stabSound, characterSpriteWidth);
 
@@ -135,6 +184,7 @@ void roundGenerator() {
   incre = -10;
   fade = 200;
   round++;
+  roundString += "I ";
   transitionCounter = 0;
   enemyCount = ceil(1.5 * round);
 
@@ -149,7 +199,7 @@ void roundGenerator() {
       enX = random(mapWidth);
       enY = random(mapHeight);
     }
-    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500, characterSpriteWidth));
+    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500, characterSpriteWidth)); //<>// //<>//
   }
   
   visibleObjectList = new ArrayList();
@@ -165,16 +215,13 @@ void roundGenerator() {
 
   collisionDetector = new CollisionDetector();
 
-  float minX = 100000;
-  float maxX = -100000;
-  float minY = 100000;
-  float maxY = -100000;
-
   PVector octagonCentre = new PVector(mapWidth/2, mapHeight/2);
   float EIGHTH_PI = PI / 8;
   octagon = createShape();
   octagon.beginShape();
-  octagon.fill(0, 150, 60);
+  //octagon.fill(0, 150, 60);
+  octagon.strokeWeight(4);
+  octagon.noFill();
   float prevSx = octagonCentre.x + cos(-EIGHTH_PI) * octagonRadius;
   float prevSy = octagonCentre.y + sin(-EIGHTH_PI) * octagonRadius;
   for (int i=0; i<8; i++) {
@@ -186,22 +233,29 @@ void roundGenerator() {
     prevSx = sx;
     prevSy = sy;
 
-    minX = min(minX, sx);
-    maxX = max(maxX, sx);
-    minY = min(minY, sy);
-    maxY = max(maxY, sy);
+    octagonMinX = min(octagonMinX, sx);
+    octagonMaxX = max(octagonMaxX, sx);
+    octagonMinY = min(octagonMinY, sy);
+    octagonMaxY = max(octagonMaxY, sy);
   }
   octagon.endShape(CLOSE);
-  
+
+  tileWidth = (octagonMaxX-octagonMinX)/tileXCount;
+  tileHeight = (octagonMaxY-octagonMinY)/tileYCount;
+
+  tiles = new int[(int)tileXCount][(int)tileYCount];
+  octStart = new PVector(octagonMinX,octagonMinY);
   int distanceFromSide = 100;
-  minX += distanceFromSide;
-  maxX -= distanceFromSide;
-  minY += distanceFromSide;
-  maxY -= distanceFromSide;
+  octagonMinX += distanceFromSide;
+  octagonMaxX -= distanceFromSide;
+  octagonMinY += distanceFromSide;
+  octagonMaxY -= distanceFromSide;
+
+
 
   int numRails = 5;
   Rail[] rails = new Rail[numRails];
-  float hexRad = (maxX - minX) /2;
+  float hexRad = (octagonMaxX - octagonMinX) /2;
   int minLengthOfRail = 600;
   int maxLengthOfRail = 900;
   
@@ -216,10 +270,10 @@ void roundGenerator() {
     do {
       do {
         do {
-          start = new PVector(random(minX, maxX), random(minY, maxY));
+          start = new PVector(random(octagonMinX, octagonMaxX), random(octagonMinY, octagonMaxY));
         } while (PVector.dist(start, octagonCentre) > hexRad);
         
-        end = new PVector(random(minX, maxX),random(minY, maxY));
+        end = new PVector(random(octagonMinX, octagonMaxX),random(octagonMinY, octagonMaxY));
         railLength = start.dist(end);
       }  while (PVector.dist(end, octagonCentre) > hexRad || railLength < minLengthOfRail || railLength > maxLengthOfRail);
       
@@ -234,7 +288,8 @@ void roundGenerator() {
   }
 }
 
-float getAngleBetweenRails(Rail r1, Rail r2) {  
+
+float getAngleBetweenRails(Rail r1, Rail r2) {
   return PVector.angleBetween(new PVector(1, r1.m), new PVector(1, r2.m));
 }
 
@@ -248,6 +303,73 @@ float getShortestDistanceBetweenRails(Rail r1, Rail r2) {
   return min(min(min(r1Start.dist(r2Start), r1Start.dist(r2End)), r1End.dist(r2Start)), r1End.dist(r2Start));
 }
 
+void updateTiles(boolean isOdd) {
+  tiles = new int[(int)tileXCount][(int)tileYCount];
+  int col;
+  do {
+    col =  (int) random(1,8);
+  } while (currentCol == col);
+  currentCol = col;
+
+  for (int i = 0; i < tileXCount; i++){
+    for (int j = 0; j < tileYCount; j++){
+      tiles[i][j] = isOdd ? col:0;
+      isOdd = !isOdd;
+    }
+    isOdd = !isOdd;
+  }
+}
+void drawTiles() {
+  fill(230);
+  rect(0, 0, mapWidth, mapHeight);
+  for (int i = 0; i < tileXCount; i++){
+    for (int j = 0; j < tileYCount; j++){
+      switch (tiles[i][j]) {
+        case 1:
+          fill(#C0C0C0);
+        break;
+        case 2:
+          fill(#FFD700);
+        break;
+        case 3:
+          fill(#FF69B4);
+        break;
+        case 4:
+          fill(#9400D3);
+        break;
+        case 5:
+          fill(#00BFFF);
+        break;
+        case 6:
+          fill(#00FF00);
+        break;
+        case 7:
+          fill(#ffa500);
+        break;
+        default:
+        fill(230);
+        break;
+      }
+      stroke(0);
+      strokeWeight(1);
+      rect((i*tileWidth) + octStart.x ,(j*tileHeight) + octStart.y,tileWidth,tileHeight);
+    }
+  }
+
+  for (int i = 0; i < octagon.getVertexCount()-1; i++) {
+    PVector v1 = octagon.getVertex(i);
+    PVector v2 = octagon.getVertex(i+1);
+    if (i%2==0) {
+      fill(230);
+      stroke(230);
+      strokeWeight(4);
+      if (i%4==0) triangle(v1.x, v2.y, v1.x, v1.y, v2.x, v2.y);
+      else triangle(v2.x, v1.y, v1.x, v1.y, v2.x, v2.y);
+    }
+
+  }
+
+}
 boolean doesLineIntersect (Rail r1, Rail r2) {
   if (r1.m == r2.m) return false;
   float x = (r2.c - r1.c) / (r1.m - r2.m);
@@ -267,17 +389,18 @@ void transitionScreen() {
   int transitionCounterMax = 300;
   
   transitionCounter++;
-  textAlign(CENTER, CENTER);
+  textAlign(LEFT, LEFT);
   textSize(52);
   if (fade >= 200) incre = -10;
   else if (fade <= 50) incre = 10;
   fade += incre;
   fill(159, 20, 0, fade);
   if (transitionCounter == 0) {
-  } else if (transitionCounter < transitionCounterMax / 2) {
-    text("I", 30, 50);
-  } else if (transitionCounter < transitionCounterMax) {
-    text("I I", 30, 50);
+  } else if (transitionCounter < 150) {
+
+    text(roundString, 30, 50);
+  } else if (transitionCounter < 300) {
+    text(roundString +"I", 30, 50);
   } else {
     roundGenerator();
   }
@@ -288,31 +411,117 @@ void transitionScreen() {
 }
 
 void drawStartScreen() {
+  image(startScreenImage, cameraX+width/2, cameraY+height/2, width, height);
+
   textAlign(CENTER, CENTER);
   textSize(32);
   fill(159, 20, 0);
-  text("Skate Park\nAfter Dark", cameraX + width/2, cameraY + height/2);
+  text("Skate Park\nAfter Dark", cameraX + width/2, cameraY + height/4);
 
   rectMode(CORNER);
 
+  float x = cameraX + width/2 - 65;
+  float y = cameraY + height/2 + height/4 - 20;
+  float w = 130;
+  float h = 50;
+  if (overRect(x, y, w, h)) {
+    fill(12, 160, 20);
+    mouseOverHelpButton = true;
+  } else {
+    noFill();
+    mouseOverHelpButton = false;
+  }
+  rect(x, y, w, h);
+  fill(255);
+  String str = "Controls";
+  text(str, cameraX + width/2, cameraY + height/2 + height/4 );
+
+  y = cameraY + height/2 + height/4 + 70;
+  if (overRect(x, y, w, h)) {
+    fill(12, 160, 20);
+    mouseOverStartButton = true;
+  } else {
+    noFill();
+    mouseOverStartButton = false;
+  }
+  rect(x, y, w, h);
+  fill(255);
+  str = "Start!";
+  text(str, cameraX + width/2, cameraY + height/2 + height/4 + 90);
+}
+
+void drawHelpScreen() {
+
+  image(helpScreenImage, cameraX+width/2, cameraY+height/2, width, height);
+
+  textAlign(CENTER, CENTER);
+  textSize(32);
+  fill(159, 20, 0);
+  text("Controls", cameraX + width/2, cameraY + height/6);
+
+  textAlign(CENTER, TOP);
+  fill(255);
+  text("Movement:", cameraX + width/4, cameraY + height/3);
+
+  text("- Use the 'W' key to move forward.", cameraX + width/4 + 10, cameraY + height/3 + 50);
+  text("- Use the 'A' key to move left.", cameraX + width/4 + 10, cameraY + height/3 + 100);
+  text("- Use the 'S' key to move backward.", cameraX + width/4 + 10, cameraY + height/3 + 150);
+  text("- Use the 'D' key to move right.", cameraX + width/4 + 10, cameraY + height/3 + 200);
+  text("- Use the SPACE bar to get off the rail.", cameraX + width/4 + 10, cameraY + height/3 + 250);
+
+  fill(255);
+  text("Shooting:", cameraX + 3*width/4, cameraY + height/3);
+
+  text("- Use the left mouse button to shoot your weapon.", cameraX + 3*width/4 + 10, cameraY + height/3 + 50);
+  text("- Aim your weapon using the mouse cursor.", cameraX + 3*width/4 + 10, cameraY + height/3 + 100);
+  text("- Take down all roadmen to progress\n through the levels.", cameraX + 3*width/4 + 10, cameraY + height/3 + 150);
+
+  text("Press the 'Tab' key to pause the game.", cameraX + 2*width/4 + 10, cameraY + height/3 + 325);
+
+  textAlign(CENTER, CENTER);
+  rectMode(CORNER);
   float x = cameraX + width/2 - 50;
   float y = cameraY + width/2 ;
   float w = 100;
   float h = 50;
   if (overRect(x, y, w, h)) {
     fill(12, 160, 20);
-    mouseOverStartButton = true;
+    mouseOverReturnButton = true;
   } else {
-    fill(230, 230, 230);
-    mouseOverStartButton = false;
+    noFill();
+    mouseOverReturnButton = false;
   }
   rect(x, y, w, h);
   fill(255);
-  String str = "Start!";
+  String str = "Return";
   text(str, cameraX + width/2, cameraY + width/2 + 20);
 }
 
+void drawStoryScreen() {
+
+  image(introScreenImage,cameraX+width/2, cameraY+height/2, width, height);
+  storyScreenCounter--;
+  if (storyScreenCounter<=0) storyScreenCounter = storyScreenMaxCounter-1;
+  textAlign(CENTER, CENTER);
+  textSize(32);
+  fill(239, 230, 239, storyScreenCounter % 255);
+  stroke(0);
+  println(storyScreenCounter);
+  text(story[story.length -1 - (int)storyScreenCounter/255], cameraX + width/2, cameraY + height/4 + storyScreenCounter % 255);
+
+  if (storyScreenCounter % 255 < 130 &&  (int)(storyScreenCounter/255) > 0 ) {
+    fill(239, 230, 239, 255);
+    text(story[story.length  - (int)storyScreenCounter/255], cameraX + width/2, cameraY + height/4 + 255 + storyScreenCounter % 255);
+  }
+
+  text(story[8], cameraX + width/2, cameraY + 9*height/10);
+
+}
+
 void drawPauseScreen() {
+
+  image(pauseScreenImage, cameraX+width/2, cameraY+height/2, width, height);
+
   textAlign(CENTER, CENTER);
   textSize(32);
   fill(159, 20, 0);
@@ -321,37 +530,53 @@ void drawPauseScreen() {
 
   rectMode(CORNER);
   float x = cameraX + width/2 - 65;
-  float y = cameraY + width/2 ;
+  float y = cameraY + height/2 + height/4;
   float w = 130;
   float h = 50;
   if (overRect(x, y, w, h)) {
     fill(12, 160, 20);
     mouseOverContinueButton = true;
   } else {
-    fill(230, 230, 230);
+    noFill();
     mouseOverContinueButton = false;
   }
   rect(x, y, w, h);
 
   fill(255);
   String str = "Continue";
-  text(str, cameraX + width/2, cameraY + width/2 + 20);
+  text(str, cameraX + width/2, cameraY + height/2 + height/4 + 20);
 
-  y = cameraY + width/2 + 70;
+  y = cameraY + height/2 + height/4 + 70;
+  if (overRect(x, y, w, h)) {
+    fill(12, 160, 20);
+    mouseOverHelpButton = true;
+  } else {
+    noFill();
+    mouseOverHelpButton = false;
+  }
+  rect(x, y, w, h);
+  fill(255);
+  str = "Control";
+  text(str, cameraX + width/2, cameraY + height/2 + height/4 + 90);
+
+  y = cameraY + height/2 + height/4 + 140;
   if (overRect(x, y, w, h)) {
     fill(12, 160, 20);
     mouseOverExitButton = true;
   } else {
-    fill(230, 230, 230);
+    noFill();
     mouseOverExitButton = false;
   }
   rect(x, y, w, h);
   fill(255);
   str = "Exit";
-  text(str, cameraX + width/2, cameraY + width/2 + 90);
+  text(str, cameraX + width/2, cameraY + height/2 + height/4 + 160);
 }
 
 void drawGameOverScreen() {
+
+  image(gameOverScreenImage, cameraX+width/2, cameraY+height/2, width, height);
+
   textAlign(CENTER, CENTER);
   textSize(32);
   fill(159, 20, 0);
@@ -367,7 +592,7 @@ void drawGameOverScreen() {
     fill(12, 160, 20);
     mouseOverRetryButton = true;
   } else {
-    fill(230, 230, 230);
+    noFill();
     mouseOverRetryButton = false;
   }
   rect(x, y, w, h);
@@ -381,7 +606,7 @@ void drawGameOverScreen() {
     fill(12, 160, 20);
     mouseOverExitButton = true;
   } else {
-    fill(230, 230, 230);
+    noFill();
     mouseOverExitButton = false;
   }
   rect(x, y, w, h);
@@ -435,8 +660,8 @@ void draw() {
     .collect(Collectors.toList());
   getOffRail(esfce);
   
-  if (coolOffRail < 60){
-    if (--coolOffRail == 0) coolOffRail = 60;
+  if (coolOffRail < maxCoolOffRail){
+    if (--coolOffRail == 0) coolOffRail = maxCoolOffRail;
   }
   
   for (Contact contact : contactList) {
@@ -448,7 +673,7 @@ void draw() {
       Rail rai = (Rail) contact.collidableA;
       Particle p = (Particle) contact.collidableB;
       if (p.state == ParticleMovementState.DEFAULT) {
-        if (p instanceof Player && coolOffRail < 60) continue;
+        if (p instanceof Player && coolOffRail < maxCoolOffRail) continue;
         getOnTheRail(p, rai);
       }
       contact.collidableB.addForce(p.trickForce);
@@ -457,7 +682,7 @@ void draw() {
       Rail rai = (Rail) contact.collidableB;
       Particle p = (Particle) contact.collidableA;
       if (p.state == ParticleMovementState.DEFAULT) {
-        if (p instanceof Player && coolOffRail < 60) continue;
+        if (p instanceof Player && coolOffRail < maxCoolOffRail) continue;
         getOnTheRail(p, rai);
       }
       contact.collidableA.addForce(p.trickForce);
@@ -466,17 +691,27 @@ void draw() {
     contact.resolve();
   }
 
+  if (frameCount % 60 == 0) {
+    updateTiles(frameCount%120 == 0);
+  }
+
   cameraX = player.pos.x - displayWidth/2;
   cameraY = player.pos.y - displayHeight/2;
 
   translate(-cameraX, -cameraY);
 
-  fill(230);
-  rect(0, 0, mapWidth, mapHeight);
-  shape(octagon, 0, 0);
+  if (helpScreen) {
+    drawHelpScreen();
+    return;
+  }
 
   if (startScreen) {
     drawStartScreen();
+    return;
+  }
+
+  if (storyScreen) {
+    drawStoryScreen();
     return;
   }
 
@@ -493,6 +728,9 @@ void draw() {
     getOffRail(List.of(player));
     return;
   }
+
+  drawTiles();
+  shape(octagon, 0, 0);
 
   for (VisibleObject visibleObject : visibleObjectList) {
     visibleObject.draw();
@@ -594,7 +832,7 @@ void getOffRail(Particle p) {
       float angle = atan2(cameraY+mouseY - p.pos.y, cameraX+mouseX - p.pos.x );
       PVector force = PVector.fromAngle(angle).setMag(1000);
       p.addForce(force);
-      coolOffRail = 59;
+      coolOffRail = maxCoolOffRail-1;
     }
     p.state = ParticleMovementState.DEFAULT;
     p.trickForce = null;
@@ -608,6 +846,7 @@ void keyPressed() {
   switch (key) {
     case 'w':
     case 'W':
+      if (storyScreen) storyScreen = false;
       player.startMovingUp();
       break;
     case 'a':
@@ -655,18 +894,38 @@ void keyReleased() {
 }
 
 void mouseReleased() {
-  if (mouseOverStartButton) {
-    startScreen = mouseOverStartButton = false;
-    playLevelChangeSound();
-  } else if (mouseOverContinueButton) {
-    pauseScreen = mouseOverContinueButton = false;
-  } else if (mouseOverRetryButton) {
-    reset();
-  } else if (mouseOverExitButton) {
-    exit();
-  } else {
-    fireBullets();
+  if (helpScreen) {
+    if (mouseOverReturnButton) {
+      helpScreen = mouseOverReturnButton = false;
+    }
   }
+  else if (startScreen) {
+    if (mouseOverStartButton) {
+      startScreen = mouseOverStartButton = false;
+      storyScreen = true;
+      playLevelChangeSound();
+    } else if (mouseOverHelpButton) {
+      helpScreen = true;
+    }
+  }
+  else if (pauseScreen) {
+    if (mouseOverHelpButton) {
+      helpScreen = true;
+    } else if (mouseOverContinueButton) {
+      pauseScreen = mouseOverContinueButton = false;
+    } else if (mouseOverExitButton) {
+      exit();
+    }
+  }
+  else if (player.getLives()<=0) {
+    if (mouseOverRetryButton) {
+      reset();
+    } else if (mouseOverExitButton) {
+      exit();
+    }
+  }
+  else if (!storyScreen) fireBullets();
+
 }
 
 void fireBullets() {
