@@ -25,13 +25,15 @@ float mapWidth,
   transitionCounter,
   storyScreenCounter,
   storyScreenMaxCounter,
-  octagonRadius = 1500,   
+  octagonRadius = 1500, 
   octagonMinX = 100000,
   octagonMaxX = -100000,
   octagonMinY = 100000,
   octagonMaxY = -100000, 
   tileXCount, tileYCount,
   tileWidth, tileHeight;
+  
+PVector octStart;
 
 int characterSpriteWidth = 200;
 Player player;
@@ -122,7 +124,8 @@ void setup() {
   startScreenImage = loadImage("background/start.jpeg");
   pauseScreenImage = loadImage("background/paused.jpeg");
   helpScreenImage = loadImage("background/control.jpeg");
-  gameOverScreenImage = loadImage("background/end.jpeg");
+  gameOverScreenImage = loadImage("background/end.jpeg"); 
+  size(width, height);
 
   reset();
 }
@@ -196,7 +199,7 @@ void roundGenerator() {
       enX = random(mapWidth);
       enY = random(mapHeight);
     }
-    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500, characterSpriteWidth));
+    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500, characterSpriteWidth)); //<>//
   }
   
   visibleObjectList = new ArrayList(); //<>// //<>//
@@ -241,7 +244,7 @@ void roundGenerator() {
   tileHeight = (octagonMaxY-octagonMinY)/tileYCount;
   
   tiles = new int[(int)tileXCount][(int)tileYCount];
-
+  octStart = new PVector(octagonMinX,octagonMinY);
   int distanceFromSide = 100;
   octagonMinX += distanceFromSide;
   octagonMaxX -= distanceFromSide;
@@ -349,7 +352,7 @@ void drawTiles() {
       }
       stroke(0);
       strokeWeight(1);
-      rect((i*tileWidth) + octagonMinX ,(j*tileHeight) + octagonMinY,tileWidth,tileHeight);
+      rect((i*tileWidth) + octStart.x ,(j*tileHeight) + octStart.y,tileWidth,tileHeight);
     }
   }
   
@@ -408,8 +411,7 @@ void transitionScreen() {
 }
 
 void drawStartScreen() {
-  imageMode(CORNERS);
-  image(startScreenImage, cameraX, cameraY, cameraX+width, cameraY + height);
+  image(startScreenImage, cameraX+width/2, cameraY+height/2, width, height);
   
   textAlign(CENTER, CENTER);
   textSize(32);
@@ -449,8 +451,8 @@ void drawStartScreen() {
 }
 
 void drawHelpScreen() {
-  imageMode(CORNERS);
-  image(helpScreenImage, cameraX, cameraY, cameraX+width, cameraY + height);
+   
+  image(helpScreenImage, cameraX+width/2, cameraY+height/2, width, height);
   
   textAlign(CENTER, CENTER);
   textSize(32);
@@ -496,8 +498,8 @@ void drawHelpScreen() {
 }
 
 void drawStoryScreen() {
-  imageMode(CORNERS);
-  image(introScreenImage, cameraX, cameraY, cameraX+width, cameraY + height);
+   
+  image(introScreenImage,cameraX+width/2, cameraY+height/2, width, height);
   storyScreenCounter--;
   if (storyScreenCounter<0) storyScreenCounter = storyScreenMaxCounter;
   textAlign(CENTER, CENTER);
@@ -516,8 +518,8 @@ void drawStoryScreen() {
 }
 
 void drawPauseScreen() {
-  imageMode(CORNERS);
-  image(pauseScreenImage, cameraX, cameraY, cameraX+width, cameraY + height);
+   
+  image(pauseScreenImage, cameraX+width/2, cameraY+height/2, width, height);
   
   textAlign(CENTER, CENTER);
   textSize(32);
@@ -571,8 +573,8 @@ void drawPauseScreen() {
 }
 
 void drawGameOverScreen() {
-  imageMode(CORNERS);
-  image(gameOverScreenImage, cameraX, cameraY, cameraX+width, cameraY + height);
+   
+  image(gameOverScreenImage, cameraX+width/2, cameraY+height/2, width, height);
   
   textAlign(CENTER, CENTER);
   textSize(32);
@@ -589,7 +591,7 @@ void drawGameOverScreen() {
     fill(12, 160, 20);
     mouseOverRetryButton = true;
   } else {
-    fill(230, 230, 230);
+    noFill();
     mouseOverRetryButton = false;
   }
   rect(x, y, w, h);
@@ -603,7 +605,7 @@ void drawGameOverScreen() {
     fill(12, 160, 20);
     mouseOverExitButton = true;
   } else {
-    fill(230, 230, 230);
+    noFill();
     mouseOverExitButton = false;
   }
   rect(x, y, w, h);
@@ -696,9 +698,6 @@ void draw() {
   cameraY = player.pos.y - displayHeight/2;
 
   translate(-cameraX, -cameraY);
-
-  drawTiles();
-  shape(octagon, 0, 0);
   
   if (helpScreen) {
     drawHelpScreen();
@@ -728,6 +727,9 @@ void draw() {
     getOffRail(List.of(player));
     return;
   }
+  
+  drawTiles();
+  shape(octagon, 0, 0);
 
   for (VisibleObject visibleObject : visibleObjectList) {
     visibleObject.draw();
