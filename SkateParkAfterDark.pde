@@ -243,10 +243,17 @@ void roundGenerator() {
   tiles = new int[(int)tileXCount][(int)tileYCount];
 
   int distanceFromSide = 100;
-  minX += distanceFromSide;
-  maxX -= distanceFromSide;
-  minY += distanceFromSide;
-  maxY -= distanceFromSide;
+  //minX += distanceFromSide;
+  //maxX -= distanceFromSide;
+  //minY += distanceFromSide;
+  //maxY -= distanceFromSide;
+  
+  octagonMinX += distanceFromSide;
+  octagonMaxX -= distanceFromSide;
+  octagonMinY += distanceFromSide;
+  octagonMaxY -= distanceFromSide;
+  
+  
 
   int numRails = 4;
   Rail[] rails = new Rail[numRails];
@@ -265,10 +272,10 @@ void roundGenerator() {
     do {
       do {
         do {
-          start = new PVector(random(minX, maxX), random(minY, maxY));
+          start = new PVector(random(octagonMinX, octagonMaxX), random(octagonMinY, octagonMaxY));
         } while (PVector.dist(start, octagonCentre) > hexRad);
         
-        end = new PVector(random(minX, maxX),random(minY, maxY));
+        end = new PVector(random(octagonMinX, octagonMaxX),random(octagonMinY, octagonMaxY));
         railLength = start.dist(end);
       }  while (PVector.dist(end, octagonCentre) > hexRad || railLength < minLengthOfRail || railLength > maxLengthOfRail);
       
