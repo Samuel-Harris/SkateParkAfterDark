@@ -199,7 +199,7 @@ void roundGenerator() {
       enX = random(mapWidth);
       enY = random(mapHeight);
     }
-    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500, characterSpriteWidth)); //<>// //<>//
+    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500, characterSpriteWidth));
   }
 
   visibleObjectList = new ArrayList();
@@ -504,7 +504,6 @@ void drawStoryScreen() {
   textSize(32);
   fill(239, 230, 239, storyScreenCounter % 255);
   stroke(0);
-  println(storyScreenCounter);
   text(story[story.length -1 - (int)storyScreenCounter/255], cameraX + width/2, cameraY + height/4 + storyScreenCounter % 255);
 
   if (storyScreenCounter % 255 < 130 &&  (int)(storyScreenCounter/255) > 0 ) {
