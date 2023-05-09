@@ -27,7 +27,7 @@ class Player extends Particle {
     lives = maxLives;
     minAngle = 0;
     maxAngle = 0;
-    moveForce = 3000;
+    moveForce = 20 * width/10;
     bulletCount = 6;
     maxBullets = 8;
     hitInvulnerabilityFrames = 30;

@@ -199,10 +199,10 @@ void roundGenerator() {
       enX = random(mapWidth);
       enY = random(mapHeight);
     }
-    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500, characterSpriteWidth)); //<>//
+    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(10 * width/10, 20 * width/10)), int(random(6, 13)), 500, characterSpriteWidth)); //<>// //<>//
   }
 
-  visibleObjectList = new ArrayList();
+  visibleObjectList = new ArrayList(); //<>//
   visibleObjectList.add(player);
   visibleObjectList.addAll(enemies);
 
@@ -684,7 +684,7 @@ void draw() {
       }
       contact.collidableA.addForce(p.trickForce); //<>//
       continue;
-    }
+    } //<>//
     contact.resolve();
   }
 

@@ -1,7 +1,6 @@
 class Bullet extends Particle {
-  static final int BULLET_SPEED = 50;
   static final float BULLET_MASS = 5;
-  
+  final int BULLET_SPEED = width/26;
   int life;
   int damage;
   PVector velocity;
