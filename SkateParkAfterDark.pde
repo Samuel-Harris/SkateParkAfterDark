@@ -152,7 +152,7 @@ void reset() {
   storyScreen = false;
   helpScreen = false;
   mouseOverHelpButton = false;
-  mouseOverReturnButton = false;
+  mouseOverReturnButton = false; //<>//
 
   player = new Player(new PVector(mapWidth/2, mapHeight/2), skatingSound, stabSound, characterSpriteWidth);
 
@@ -199,7 +199,7 @@ void roundGenerator() {
       enX = random(mapWidth);
       enY = random(mapHeight);
     }
-    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500, characterSpriteWidth));
+    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(2000, 3000)), int(random(6, 13)), 500, characterSpriteWidth)); //<>//
   }
 
   visibleObjectList = new ArrayList();
@@ -498,8 +498,8 @@ void drawHelpScreen() {
 void drawStoryScreen() {
 
   image(introScreenImage, cameraX+width/2, cameraY+height/2, width, height);
-  storyScreenCounter--;
-  if (storyScreenCounter<=0) storyScreenCounter = storyScreenMaxCounter-1;
+  storyScreenCounter-=2;
+  if (storyScreenCounter<=0) storyScreenCounter = storyScreenMaxCounter-2;
   textAlign(CENTER, CENTER);
   textSize(32);
   fill(239, 230, 239, storyScreenCounter % 255);
