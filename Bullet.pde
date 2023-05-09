@@ -1,6 +1,6 @@
 class Bullet extends Particle {
   static final int BULLET_SPEED = 50;
-  static final float BULLET_MASS = 15;
+  static final float BULLET_MASS = 5;
   
   int life;
   int damage;
