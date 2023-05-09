@@ -496,10 +496,11 @@ void drawHelpScreen() {
 }
 
 void drawStoryScreen() {
+  float speed = 1.4;
 
   image(introScreenImage, cameraX+width/2, cameraY+height/2, width, height);
-  storyScreenCounter-=2;
-  if (storyScreenCounter<=0) storyScreenCounter = storyScreenMaxCounter-2;
+  storyScreenCounter-=speed;
+  if (storyScreenCounter<=0) storyScreenCounter = storyScreenMaxCounter-speed;
   textAlign(CENTER, CENTER);
   textSize(32);
   fill(239, 230, 239, storyScreenCounter % 255);
