@@ -219,7 +219,6 @@ void roundGenerator() {
   float EIGHTH_PI = PI / 8;
   octagon = createShape();
   octagon.beginShape();
-  //octagon.fill(0, 150, 60);
   octagon.strokeWeight(4);
   octagon.noFill();
   float prevSx = octagonCentre.x + cos(-EIGHTH_PI) * octagonRadius;
@@ -284,7 +283,7 @@ void roundGenerator() {
       }
     } while (!isValid);
     collidableObjectList.add(rails[i]);
-    visibleObjectList.add(rails[i]);
+    visibleObjectList.add(0,rails[i]);
   }
 }
 
@@ -474,7 +473,8 @@ void drawHelpScreen() {
   
   text("- Use the left mouse button to shoot your weapon.", cameraX + 3*width/4 + 10, cameraY + height/3 + 50);
   text("- Aim your weapon using the mouse cursor.", cameraX + 3*width/4 + 10, cameraY + height/3 + 100);
-  text("- Take down all roadmen to progress\n through the levels.", cameraX + 3*width/4 + 10, cameraY + height/3 + 150);
+  text("- Ride the rails to gain ammo.", cameraX + 3*width/4 + 10, cameraY + height/3 + 150);
+  text("- Take down all roadmen to progress\n through the levels.", cameraX + 3*width/4 + 10, cameraY + height/3 + 200);
   
   text("Press the 'Tab' key to pause the game.", cameraX + 2*width/4 + 10, cameraY + height/3 + 325);
 
@@ -506,7 +506,6 @@ void drawStoryScreen() {
   textSize(32);
   fill(239, 230, 239, storyScreenCounter % 255);
   stroke(0);
-  println(storyScreenCounter);
   text(story[story.length -1 - (int)storyScreenCounter/255], cameraX + width/2, cameraY + height/4 + storyScreenCounter % 255);
   
   if (storyScreenCounter % 255 < 130 &&  (int)(storyScreenCounter/255) > 0 ) {
@@ -685,7 +684,7 @@ void draw() {
         if (p instanceof Player && coolOffRail < maxCoolOffRail) continue;
         getOnTheRail(p, rai);
       }
-      contact.collidableA.addForce(p.trickForce);
+      contact.collidableA.addForce(p.trickForce); //<>//
       continue;
     }
     contact.resolve();
