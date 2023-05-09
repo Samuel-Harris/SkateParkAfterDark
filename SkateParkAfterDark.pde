@@ -152,7 +152,7 @@ void reset() {
   storyScreen = false;
   helpScreen = false;
   mouseOverHelpButton = false;
-  mouseOverReturnButton = false; //<>//
+  mouseOverReturnButton = false; //<>// //<>//
 
   player = new Player(new PVector(mapWidth/2, mapHeight/2), skatingSound, stabSound, characterSpriteWidth);
 
@@ -199,7 +199,7 @@ void roundGenerator() {
       enX = random(mapWidth);
       enY = random(mapHeight);
     }
-    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(10 * width/10, 20 * width/10)), int(random(6, 13)), 500, characterSpriteWidth)); //<>// //<>//
+    enemies.add(new Enemy(new PVector(enX, enY), player, int(random(0.5 * width, 1.5 * width)), int(random(6, 13)), 500, characterSpriteWidth)); //<>// //<>// //<>//
   }
 
   visibleObjectList = new ArrayList(); //<>//
