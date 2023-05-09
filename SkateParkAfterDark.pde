@@ -793,8 +793,8 @@ void getOnTheRail(Particle p, Rail rai) {
   float d = PVector.dot(dir, rai.getNormalisedVector());
   p.state = ParticleMovementState.RAIL;
   d *= -500;
-  float maxSpeed = 3000;
-  float minSpeed = 1500;
+  float maxSpeed = 22 * width/10;
+  float minSpeed = 10 * width/10;
   if (abs(d) < minSpeed) {
     if (d<0) d = -minSpeed;
     else d = minSpeed;
